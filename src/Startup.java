@@ -1,7 +1,11 @@
 public class Startup {
-    public void main (String[] args)
+    public static void main (String[] args)
     {
-        OS os = new OS(args);
-        os.run();
+        String[] teste = {"teste1", "teste2"};
+        Kernel testeOs = new Kernel(teste);
+        
+        
+        Kernel polvoOs = new Kernel(args);
+        polvoOs.run();
     }
 }
