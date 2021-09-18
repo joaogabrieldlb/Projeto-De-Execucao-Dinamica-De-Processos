@@ -1,3 +1,4 @@
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,7 @@ public class Programa extends Primitivas
     private Map<String, Integer> data = new HashMap<>();
     private Map<String, Integer> lables = new HashMap<>();
     
-    public Programa(String nomeDoArquivo)
+    public Programa(Path arquivoDoPrograma)
     {
         
     }

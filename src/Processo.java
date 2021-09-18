@@ -1,27 +1,31 @@
+import java.nio.file.Path;
+
 public class Processo {
     private Programa programa;
-    private int ultimoPassoDoOS;
+    private long passoDeExecucaoDoOS;
     private EstadoProcesso estado;
-    // TODO: definir como popular um dos parâmetros
     private int prioridade;
     private int quantum;
     
-    public Processo(Programa programa, int ultimoPassoDoOS, EstadoProcesso estado) {
-        this.programa = programa;
-        this.ultimoPassoDoOS = ultimoPassoDoOS;
-        this.estado = estado;
+    public Processo(Path arquivoDoPrograma, long passoDeExecucaoDoOS, int prioridade, int quantum) {
+        this.programa = new Programa(arquivoDoPrograma);
+        this.passoDeExecucaoDoOS = passoDeExecucaoDoOS;
+        this.estado = EstadoProcesso.READY;
+        this.prioridade = prioridade;
+        this.quantum = quantum;
+
     }
 
     public Programa getPrograma() {
         return programa;
     }
 
-    public int getUltimoPassoDoOS() {
-        return ultimoPassoDoOS;
+    public long getUltimoPassoDoOS() {
+        return passoDeExecucaoDoOS;
     }
 
     public void setUltimoPassoDoOS(int ultimoPassoDoOS) {
-        this.ultimoPassoDoOS = ultimoPassoDoOS;
+        this.passoDeExecucaoDoOS = ultimoPassoDoOS;
     }
 
     public EstadoProcesso getEstadoDoProcesso() {
