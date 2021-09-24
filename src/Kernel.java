@@ -20,7 +20,7 @@ public class Kernel
     public Kernel(String[] args)
     {
         this.appsPath = Startup.appsDirectory;
-        // Verificação de existencia de argumentos
+        // Verificacao de existencia de argumentos
         if (args.length == 0)
         {
             throw new ExceptionInInitializerError("OS sem argumentos. Saindo.");
@@ -131,7 +131,9 @@ public class Kernel
                     String complementoPrograma = iterLP.next();
                     switch (complementoPrograma)
                     {
-                        case "0", "1", "2":
+                        case "0":
+                        case "1":
+                        case "2":
                             prioridade = Integer.parseInt(complementoPrograma);
                             break;
                         default:
