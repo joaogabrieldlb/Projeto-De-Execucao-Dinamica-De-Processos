@@ -6,16 +6,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class Kernel
 {
     enum PoliticaDePrioridade { PRIORIDADE_COM_PREEMPCAO, ROUND_ROBIN };
     public static int PRIORIDADE_PADRAO = 2;
+    private long pidCounter = 1;
     private final String appsPath;
-    private List<Processo> filaDeProcessos = new ArrayList<>();
-    private long passoDeExecucao = 0;
     private PoliticaDePrioridade politicaDoEscalonador;
     private int quantum;
+    private List<Processo> filaDeProcessos = new ArrayList<>();
+    private long passoDeExecucao = 0;
 
     public Kernel(String[] args)
     {
@@ -141,64 +144,18 @@ public class Kernel
                     }
                 }
 
-                filaDeProcessos.add(new Processo(arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
-                // List<String> arquivoPrograma = Files.readAllLines(Paths.get(appsPath, parametro));
+                try {
+                    filaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
+                    pidCounter++;
+                } catch (Exception e) {
+                    System.err.println("Erro ao carregar " + parametro + ": " + e.getMessage());
+                }
             }
-            // TODO: else exception
-        
-        }
-
-/* 
-        // fluxo simples
-        for (int i = 0; i < args.length; i++)
-        {
-            switch (args[i].toUpperCase())
+            else
             {
-                // Define a politica
-                case "-P":
-                    String complemento;
-                    System.out.println(listaDeParametros.indexOf("-p"));
-                    try {
-                        complemento = args[i + 1].toUpperCase();
-                        i++;
-                    } catch (IndexOutOfBoundsException e) {
-                        throw new InvalidParameterException("Parametro -p invalido");
-                    }
-                    if (politicaDoEscalonador == null)
-                    {
-                        switch (complemento)
-                        {
-                            case "PP":
-                                this.politicaDoEscalonador = PoliticaDePrioridade.PRIORIDADE_COM_PREEMPCAO;
-                                break;
-                            case "RR":
-                                this.politicaDoEscalonador = PoliticaDePrioridade.ROUND_ROBIN;
-                                int quantum;
-                                try {
-                                    quantum = Integer.parseInt(args[i + 1]);
-                                    i++;
-                                } catch (Exception e) {
-                                    throw e;
-                                }
-                                break;
-                            default:
-                                throw new InvalidParameterException("Parametro -p invalido");
-                        }
-                    }
-                    // else
-                    // {
-                    //     throw new InvalidParameterException("Politica do escalonador ja definida.");
-                    // }
-                    break;
-                // Define a lista de processos com prioridade
-                case "-L":
-
-                        
+                System.err.println("Erro ao carregar " + parametro + ": arquivo indisponivel.");
             }
-            
         }
-*/
-
     }
 
     public void run ()
@@ -206,6 +163,8 @@ public class Kernel
         do
         {
 
+            escalonador();
+            filaDeProcessos.get(0).run();
             imprimeEstado();
             passoDeExecucao++;
         }
@@ -228,7 +187,9 @@ public class Kernel
 
     public void escalonador ()
     {
-
+        filaDeProcessos.sort((p1, p2) -> p1.getEstadoDoProcesso().compareTo(p2.getEstadoDoProcesso()));
+        System.out.println(filaDeProcessos);
+        
     }
 
     public void processo ()

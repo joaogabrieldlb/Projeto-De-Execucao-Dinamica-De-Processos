@@ -1,63 +1,43 @@
 public abstract class Primitivas {
-    public void aritimeticoAdd (Integer acc, int valor)
+    public void aritimeticoAdd (int acc, int op1)
     {
-        acc += valor;
+        acc += op1;
     }
-    public void aritimericoAdd (Integer acc, Integer op1Ref)
+    public void aritimeticoSub (int acc, int op1)
     {
-        aritimeticoAdd (acc, op1Ref.intValue());
+        acc -= op1;
     }
-    public void aritimeticoSub (Integer acc, int valor)
+    public void aritimeticoMult (int acc, int op1)
     {
-        acc -= valor;
+        acc *= op1;
     }
-    public void aritimericoSub (Integer acc, Integer op1Ref)
+    public void aritimeticoDiv (int acc, int op1)
     {
-        aritimeticoSub (acc, op1Ref.intValue());
+        acc /= op1;
     }
-    public void aritimeticoMult (Integer acc, int valor)
+    public void memoriaLoad (int acc, int op1)
     {
-        acc *= valor;
+        acc = op1;
     }
-    public void aritimericoMult (Integer acc, Integer op1Ref)
+    public void memoriaStore (int op1, int acc)
     {
-        aritimeticoMult (acc, op1Ref.intValue());
+        op1 = acc;
     }
-    public void aritimeticoDiv (Integer acc, int valor)
-    {
-        acc /= valor;
-    }
-    public void aritimericoDiv (Integer acc, Integer op1Ref)
-    {
-        aritimeticoDiv (acc, op1Ref.intValue());
-    }
-    public void memoriaLoad (Integer accRef, int op1)
-    {
-        accRef = op1;
-    }
-    public void memoriaLoad (Integer accRef, Integer op1Ref)
-    {
-        memoriaLoad(accRef, op1Ref.intValue());
-    }
-    public void memoriaStore (Integer op1Ref, Integer accRef)
-    {
-        op1Ref = accRef;
-    }
-    public void saltoBRANY (Integer pc, int labelAddress)
+    public void saltoBRANY (int pc, int labelAddress)
     {
         pc = labelAddress;
     }
-    public void saltoBRPOS (Integer pc, int labelAddress, Integer acc)
+    public void saltoBRPOS (int pc, int labelAddress, int acc)
     {
-        if (acc.intValue() > 0) pc = labelAddress;
+        if (acc > 0) pc = labelAddress;
     }
-    public void saltoBRZERO (Integer pc, int labelAddress, Integer acc)
+    public void saltoBRZERO (int pc, int labelAddress, int acc)
     {
-        if (acc.intValue() == 0) pc = labelAddress;
+        if (acc == 0) pc = labelAddress;
     }
-    public void saltoBRNEG (Integer pc, int labelAddress, Integer acc)
+    public void saltoBRNEG (int pc, int labelAddress, int acc)
     {
-        if (acc.intValue() < 0) pc = labelAddress;
+        if (acc < 0) pc = labelAddress;
     }
     public void sistemaSYSCALL (int index)
     {
