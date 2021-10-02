@@ -2,6 +2,7 @@ import java.nio.file.Path;
 
 public class Processo extends Primitivas {
     private Programa programa;
+    private String nomeDoPrograma;
     private EstadoProcesso estado;
     private long pid;
     private int acc = 0;
@@ -12,6 +13,7 @@ public class Processo extends Primitivas {
     
     public Processo(long pid, Path arquivoDoPrograma, long passoDeExecucaoDoOS, int prioridade, int quantum) throws Exception {
         this.pid = pid;
+        this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
         this.passoDeExecucaoDoOS = passoDeExecucaoDoOS;
         this.estado = EstadoProcesso.READY;
@@ -20,56 +22,48 @@ public class Processo extends Primitivas {
 
     }
 
-    
-    public void run ()
+    public EstadoProcesso processaLinha ()
     {
-        while (estado.equals(EstadoProcesso.RUNNING))
-        {
+        String linha = programa.code.get(this.pc);
+        // DEBUG
+        if (Startup.teste) System.out.println("LINHA DE EXECUÇÃO: " + linha);
 
-            for (String linha : programa.code) {
-                processaLinha(linha);
-            }
-        }
-    }
-
-    public void processaLinha (String linha)
-    {
         String[] linhaDeComando = linha.toUpperCase().split(" ");
         String complemento = linhaDeComando[1];
-        int labelAddress = 0;
+        Integer labelAddress = 0;
         int op1 = 0;
-        if (Character.isLetter(complemento.charAt(0)))
-        {
-            labelAddress = programa.labels.get(complemento);
-        }
-        else
-        {
-            op1 = complemento.startsWith("#") ? 
-                Integer.valueOf(complemento.substring(1)) :
-                Integer.valueOf(programa.data.get(complemento));
-        }
+        labelAddress = programa.labels.get(complemento);
+        op1 = complemento.startsWith("#") ? 
+            Integer.valueOf(complemento.substring(1)) :
+            Integer.valueOf(programa.data.get(complemento));
         switch (linhaDeComando[0])
         {
             case "ADD":
-                aritimeticoAdd(this.acc, op1);
+                this.acc = aritimeticoAdd(this.acc, op1);
+                this.pc++;
                 break;
-                case "SUB":
+            case "SUB":
                 aritimeticoSub(this.acc, op1);
+                this.pc++;
                 break;
             case "MULT":
                 aritimeticoMult(this.acc, op1);
+                this.pc++;
                 break;
             case "DIV":
                 aritimeticoDiv(this.acc, op1);
+                this.pc++;
                 break;
             case "LOAD":
-                memoriaLoad(this.acc, op1);
+                this.acc = memoriaLoad(this.acc, op1);
+                this.pc++;
                 break;
             case "STORE":
                 if (complemento.startsWith("#"))
-                    memoriaStore(this.acc, op1);
+                    throw new RuntimeException("Operação SOTRE com complemento invalido");
                 else
                     memoriaStore(this.acc, op1);
+                this.pc++;
                 break;
             case "BRANY":
                 saltoBRANY(this.pc, labelAddress);
@@ -88,7 +82,17 @@ public class Processo extends Primitivas {
             default:
                 throw new RuntimeException("Linha de programa invalida.");
         }
+        return this.getEstadoDoProcesso();
+    }
 
+    @Override
+    public void sistemaSYSCALL(int index) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    public int getPrioridade() {
+        return prioridade;
     }
 
     public Programa getPrograma() {
@@ -112,12 +116,18 @@ public class Processo extends Primitivas {
     }
 
 
+
     @Override
     public String toString() {
-        return "Processo [acc=" + acc + ", estado=" + estado + ", passoDeExecucaoDoOS=" + passoDeExecucaoDoOS + ", pc="
-                + pc + ", pid=" + pid + ", prioridade=" + prioridade + ", programa=" + programa + ", quantum=" + quantum
-                + "]";
+        return "Processo ["
+            + "pid=" + pid
+            + ", nomeDoPrograma=" + nomeDoPrograma
+            + ", estado=" + estado
+            + ", prioridade=" + prioridade 
+            + ", quantum=" + quantum 
+            + ", pc=" + pc
+            + ", acc=" + acc
+            + ", passoDeExecucaoDoOS=" + passoDeExecucaoDoOS
+            + "]";
     }
-
-    
 }

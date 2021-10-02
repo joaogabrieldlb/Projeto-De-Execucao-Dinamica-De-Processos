@@ -1,11 +1,11 @@
 public abstract class Primitivas {
-    public void aritimeticoAdd (int acc, int op1)
+    public int aritimeticoAdd (int acc, int op1)
     {
-        acc += op1;
+        return acc + op1;
     }
-    public void aritimeticoSub (int acc, int op1)
+    public int aritimeticoSub (int acc, int op1)
     {
-        acc -= op1;
+        return acc - op1;
     }
     public void aritimeticoMult (int acc, int op1)
     {
@@ -15,9 +15,9 @@ public abstract class Primitivas {
     {
         acc /= op1;
     }
-    public void memoriaLoad (int acc, int op1)
+    public int memoriaLoad (int acc, int op1)
     {
-        acc = op1;
+        return op1;
     }
     public void memoriaStore (int op1, int acc)
     {
@@ -39,8 +39,5 @@ public abstract class Primitivas {
     {
         if (acc < 0) pc = labelAddress;
     }
-    public void sistemaSYSCALL (int index)
-    {
-        // TODO:    
-    }
+    public abstract void sistemaSYSCALL (int index);
 }

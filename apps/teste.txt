@@ -23,8 +23,8 @@ fim:
 .endcode
 
 .data
-.enddata
   a 0
   b 1
-  controle 0
+  controle 5
   aux 0
+.enddata

@@ -29,7 +29,7 @@ public class Programa
             throw new InvalidPropertiesFormatException("Arquivo com estrutura invalida.");
         }
 
-        codigoFonte.subList(codeStart + 1, codeEnd).forEach(s -> code.add(s.trim()));;
+        codigoFonte.subList(codeStart + 1, codeEnd).forEach(s -> code.add(s.trim().toUpperCase()));
 
         for (String string : code) {
             if (string.endsWith(":"))
@@ -40,10 +40,8 @@ public class Programa
 
         code.removeIf(s -> s.endsWith(":"));
 
-        if ((dataEnd - dataStart) > 0) {
-            data = codigoFonte.subList(dataStart + 1, dataEnd).stream().map(s -> s.trim().split(" ")).collect(Collectors.toMap(s -> s[0], s -> s[1]));
+        if ((dataEnd - dataStart) > 1) {
+            data = codigoFonte.subList(dataStart + 1, dataEnd).stream().map(s -> s.trim().toUpperCase().split(" ")).collect(Collectors.toMap(s -> s[0], s -> s[1]));
         }
     }
-
-
 }

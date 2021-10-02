@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class Kernel
 {
@@ -148,12 +146,12 @@ public class Kernel
                     filaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
                     pidCounter++;
                 } catch (Exception e) {
-                    System.err.println("Erro ao carregar " + parametro + ": " + e.getMessage());
+                    System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
                 }
             }
             else
             {
-                System.err.println("Erro ao carregar " + parametro + ": arquivo indisponivel.");
+                System.err.println("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
             }
         }
     }
@@ -164,7 +162,7 @@ public class Kernel
         {
 
             escalonador();
-            filaDeProcessos.get(0).run();
+            filaDeProcessos.get(0).processaLinha();
             imprimeEstado();
             passoDeExecucao++;
         }
@@ -187,7 +185,7 @@ public class Kernel
 
     public void escalonador ()
     {
-        filaDeProcessos.sort((p1, p2) -> p1.getEstadoDoProcesso().compareTo(p2.getEstadoDoProcesso()));
+        filaDeProcessos.sort((p1, p2) -> p1.getEstadoDoProcesso().equals(p2.getEstadoDoProcesso()) ? p1.getPrioridade() - p2.getPrioridade() : p1.getEstadoDoProcesso().compareTo(p2.getEstadoDoProcesso()));
         System.out.println(filaDeProcessos);
         
     }

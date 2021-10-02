@@ -6,7 +6,7 @@ public class Startup {
     public static void main (String[] args)
     {
         if (Startup.teste) {
-            String[] argsTeste = {"oi1", "-1l", "-oi2", "-p", "pp", "1", "-l", "d", "Prog2.txt", "1", "teste.txt", "3", "-g"};
+            String[] argsTeste = {"oi1", "-1l", "-oi2", "-p", "pp", "1", "-l", "d", "teste.txt", "0", "Prog2.txt", "1", "-g"};
             Kernel testeOs = new Kernel(argsTeste);
             testeOs.run();
             return;
