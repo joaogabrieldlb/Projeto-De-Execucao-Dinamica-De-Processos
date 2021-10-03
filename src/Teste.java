@@ -3,9 +3,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Teste {
     public static void main(String[] args) {
+        System.out.println(args[0]);
         String APP_PATH = "apps";
 
         System.out.println(Files.exists(Paths.get(APP_PATH, "prog1.txt")));
@@ -15,23 +18,48 @@ public class Teste {
         es.add(EstadoProcesso.BLOCKED);
         es.add(EstadoProcesso.EXIT);
         es.add(EstadoProcesso.READY);
-        es.add(EstadoProcesso.TIMEOUT);
         Collections.sort(es, (a, b) -> a.compareTo(b));
         System.out.println(es);
-        
-        RefMem r1 = new RefMem();
-        r1.valor = 1;
-        RefMem r2 = new RefMem();
-        r2.valor = 2;
-        RefMem r3 = new RefMem();
-        r3 = r1;
-        r3.valor = 4;
 
-        System.out.println(r1.valor);
-        System.out.println(r2.valor);
-        System.out.println(r3.valor);
+        RefMem p1 = new RefMem(0, "p1");
+        RefMem p2 = new RefMem(1, "p2");
+        RefMem p3 = new RefMem(1, "p3");
+        RefMem p4 = new RefMem(1, "p4");
+        RefMem p5 = new RefMem(2, "p5");
+        RefMem p6 = new RefMem(2, "p6");
+        RefMem p7 = new RefMem(2, "p7");
+        RefMem p8 = new RefMem(3, "p8");
+
+        Queue<RefMem> refMems = new LinkedBlockingQueue<RefMem>();
+
+        refMems.add(p1);
+        System.out.println(refMems);
+        refMems.add(p2);
+        System.out.println(refMems);
+        refMems.add(p3);
+        System.out.println(refMems);
+        refMems.add(p4);
+        System.out.println(refMems);
+        refMems.add(p5);
+        System.out.println(refMems);
+        refMems.add(p6);
+        System.out.println(refMems);
+        refMems.add(p7);
+        System.out.println(refMems);
+        refMems.add(p8);
+        System.out.println(refMems);
+        
+        // refMems.remove(p2);
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems.remove());
+        System.out.println(refMems);
 
 
     }
-    
 }

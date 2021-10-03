@@ -8,7 +8,6 @@ loop:
   add b
   store aux
   load b
-loop:
   store a
   load aux
   store b
@@ -17,7 +16,7 @@ loop:
   store controle
   BRANY loop
 fim:
-  load b
+  load a
   syscall 1
   syscall 0
 .endcode
@@ -25,6 +24,6 @@ fim:
 .data
   a 0
   b 1
-  controle 5
+  controle 3
   aux 0
 .enddata

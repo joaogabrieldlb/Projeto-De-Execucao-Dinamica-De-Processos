@@ -34,14 +34,16 @@ public class Programa
         for (String string : code) {
             if (string.endsWith(":"))
             {
-                labels.put(string, code.indexOf(string) - labels.size());
+                labels.put(string.replace(":", ""), code.indexOf(string) - labels.size());
             }
         }
 
         code.removeIf(s -> s.endsWith(":"));
 
         if ((dataEnd - dataStart) > 1) {
-            data = codigoFonte.subList(dataStart + 1, dataEnd).stream().map(s -> s.trim().toUpperCase().split(" ")).collect(Collectors.toMap(s -> s[0], s -> s[1]));
+            data = codigoFonte.subList(dataStart + 1, dataEnd).stream()
+                .map(s -> s.trim().toUpperCase().split(" "))
+                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
         }
     }
 }

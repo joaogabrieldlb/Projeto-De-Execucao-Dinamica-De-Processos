@@ -6,16 +6,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Kernel
 {
-    enum PoliticaDePrioridade { PRIORIDADE_COM_PREEMPCAO, ROUND_ROBIN };
-    public static int PRIORIDADE_PADRAO = 2;
+    // Definicao da politica de escalonamento
+    enum PoliticaDeEscalonamento { PRIORIDADE_COM_PREEMPCAO, ROUND_ROBIN };
+    private PoliticaDeEscalonamento politicaDoEscalonador;
+
     private long pidCounter = 1;
-    private final String appsPath;
-    private PoliticaDePrioridade politicaDoEscalonador;
+    private String appsPath;
+ 
+    private List<Processo> listaDeProcessos = new ArrayList<>();
+    
+    // Caso a politica de escalonamento for Round Robin
     private int quantum;
-    private List<Processo> filaDeProcessos = new ArrayList<>();
+    private Queue<Processo> filaProcessosProntosRR = new LinkedBlockingQueue<>();
+
+    // Caso a politica de escalonamento for Prioridade Preemptivo
+    private Queue<Processo> filaProcessosProntosAltaPrioridade = new LinkedBlockingQueue<>();
+    private Queue<Processo> filaProcessosProntosMediaPrioridade = new LinkedBlockingQueue<>();
+    private Queue<Processo> filaProcessosProntosBaixaPrioridade = new LinkedBlockingQueue<>();
+    public static final int PRIORIDADE_PADRAO = 2;
+
     private long passoDeExecucao = 0;
 
     public Kernel(String[] args)
@@ -57,12 +71,12 @@ public class Kernel
             switch (complementoP)
             {
                 case "PP":
-                    this.politicaDoEscalonador = PoliticaDePrioridade.PRIORIDADE_COM_PREEMPCAO;
+                    this.politicaDoEscalonador = PoliticaDeEscalonamento.PRIORIDADE_COM_PREEMPCAO;
                     //DEBUG
                     if (Startup.teste) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
                     break;
                 case "RR":
-                    this.politicaDoEscalonador = PoliticaDePrioridade.ROUND_ROBIN;
+                    this.politicaDoEscalonador = PoliticaDeEscalonamento.ROUND_ROBIN;
                     //DEBUG
                     if (Startup.teste) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
                     try {
@@ -143,7 +157,7 @@ public class Kernel
                 }
 
                 try {
-                    filaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
+                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
                     pidCounter++;
                 } catch (Exception e) {
                     System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
@@ -154,46 +168,119 @@ public class Kernel
                 System.err.println("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
             }
         }
+        
+        // switch(politicaDoEscalonador)
+        // {
+        //     case PRIORIDADE_COM_PREEMPCAO:
+        //         listaDeProcessos.stream()
+        //             .filter(p -> p.getPrioridade() == 0)
+        //             .forEach(p -> filaProcessosProntosAltaPrioridade.add(p));
+        //         listaDeProcessos.stream()
+        //             .filter(p -> p.getPrioridade() == 1)
+        //             .forEach(p -> filaProcessosProntosMediaPrioridade.add(p));
+        //         listaDeProcessos.stream()
+        //             .filter(p -> p.getPrioridade() == 2)
+        //             .forEach(p -> filaProcessosProntosBaixaPrioridade.add(p));
+        //         break;
+        //     case ROUND_ROBIN:
+        //         filaProcessosProntosRR.addAll(listaDeProcessos);
+        //         break;
+        // }
     }
 
     public void run ()
     {
         do
         {
-
-            escalonador();
-            filaDeProcessos.get(0).processaLinha();
-            imprimeEstado();
-            passoDeExecucao++;
+            Processo processoAtual = escalonador();
+            if(processoAtual != null)
+            {
+                processoAtual.setTimeout(this.quantum);
+                // DEBUG
+                if (Startup.teste) System.out.println("NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
+                // processoAtual.processaLinha(); //void
+                processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador)); //return estado
+                while (processoAtual.getEstadoDoProcesso() == EstadoProcesso.RUNNING)
+                {
+                    processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador));
+                    atualizaEstados();
+                }
+            }
+            else
+            {
+                atualizaEstados();
+            }
         }
         while (!isTodosProcessosEncerrados());
+        imprimeEstado();
+        System.out.println("FIM DO OS!");
+        return;
 
 
+    }
+
+    private void atualizaEstados() {
+        listaDeProcessos.stream()
+            .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.BLOCKED))
+            .forEach(p -> p.decrementaBlockTime());
     }
 
     private void imprimeEstado()
     {
         // TODO: Imprimir estado do OS e da aplicação
+        listaDeProcessos.forEach(System.out::println);
     }
 
     private boolean isTodosProcessosEncerrados ()
     {
-        return filaDeProcessos.stream()
+        return listaDeProcessos.stream()
             .map(p -> p.getEstadoDoProcesso())
             .allMatch(ep -> ep.equals(EstadoProcesso.EXIT));
     }
 
-    public void escalonador ()
+    public Processo escalonador()
     {
-        filaDeProcessos.sort((p1, p2) -> p1.getEstadoDoProcesso().equals(p2.getEstadoDoProcesso()) ? p1.getPrioridade() - p2.getPrioridade() : p1.getEstadoDoProcesso().compareTo(p2.getEstadoDoProcesso()));
-        System.out.println(filaDeProcessos);
-        
+        switch(politicaDoEscalonador)
+        {
+            case PRIORIDADE_COM_PREEMPCAO:
+                listaDeProcessos.stream()
+                    .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY) && p.getPrioridade() == 0)
+                    .forEach(p -> {
+                        if (!filaProcessosProntosAltaPrioridade.contains(p)) filaProcessosProntosAltaPrioridade.add(p);
+                    });
+                listaDeProcessos.stream()
+                    .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY) && p.getPrioridade() == 1)
+                    .forEach(p -> {
+                        if (!filaProcessosProntosMediaPrioridade.contains(p)) filaProcessosProntosMediaPrioridade.add(p);
+                    });
+                listaDeProcessos.stream()
+                    .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY) && p.getPrioridade() == 2)
+                    .forEach(p -> {
+                        if (!filaProcessosProntosBaixaPrioridade.contains(p)) filaProcessosProntosBaixaPrioridade.add(p);
+                    });
+                if(!filaProcessosProntosAltaPrioridade.isEmpty()) 
+                    return filaProcessosProntosAltaPrioridade.poll();
+                if(!filaProcessosProntosMediaPrioridade.isEmpty()) 
+                    return filaProcessosProntosMediaPrioridade.poll();
+                if(!filaProcessosProntosBaixaPrioridade.isEmpty()) 
+                    return filaProcessosProntosBaixaPrioridade.poll();
+                return null;
+            case ROUND_ROBIN:
+                listaDeProcessos.stream()
+                .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY))
+                .forEach(p -> {
+                    if (!filaProcessosProntosRR.contains(p)) filaProcessosProntosRR.add(p);
+                });
+                return filaProcessosProntosRR.poll();
+            default:
+                return null;
+        }
     }
 
-    public void processo ()
+	public static void imprimeHelp()
     {
-
-    }
-
-
+        System.out.println("Uso do OS:");
+        System.out.println("Modo de teste: \"java Startup -t\"");
+        System.out.println("Modo normal: \"java Startup -p [politica | quantum] -l [lista de programas | prioridade]\"");
+	}
 }

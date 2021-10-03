@@ -7,37 +7,40 @@ public abstract class Primitivas {
     {
         return acc - op1;
     }
-    public void aritimeticoMult (int acc, int op1)
+    public int aritimeticoMult (int acc, int op1)
     {
-        acc *= op1;
+        return acc * op1;
     }
-    public void aritimeticoDiv (int acc, int op1)
+    public int aritimeticoDiv (int acc, int op1)
     {
-        acc /= op1;
+        return acc / op1;
     }
-    public int memoriaLoad (int acc, int op1)
+    public int memoriaLoad (int op1)
     {
         return op1;
     }
-    public void memoriaStore (int op1, int acc)
+    public String memoriaStore (int acc)
     {
-        op1 = acc;
+        return String.valueOf(acc);
     }
-    public void saltoBRANY (int pc, int labelAddress)
+    public int saltoBRANY (int labelAddress)
     {
-        pc = labelAddress;
+        return labelAddress;
     }
-    public void saltoBRPOS (int pc, int labelAddress, int acc)
+    public int saltoBRPOS (int pc, int labelAddress, int acc)
     {
-        if (acc > 0) pc = labelAddress;
+        if (acc > 0) return labelAddress;
+        else return ++pc;
     }
-    public void saltoBRZERO (int pc, int labelAddress, int acc)
+    public int saltoBRZERO (int pc, int labelAddress, int acc)
     {
-        if (acc == 0) pc = labelAddress;
+        if (acc == 0) return labelAddress;
+        else return ++pc;
     }
-    public void saltoBRNEG (int pc, int labelAddress, int acc)
+    public int saltoBRNEG (int pc, int labelAddress, int acc)
     {
-        if (acc < 0) pc = labelAddress;
+        if (acc < 0) return labelAddress;
+        else return ++pc;
     }
-    public abstract void sistemaSYSCALL (int index);
+    public abstract EstadoProcesso sistemaSYSCALL (String index);
 }

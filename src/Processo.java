@@ -1,6 +1,9 @@
 import java.nio.file.Path;
+import java.util.Random;
+import java.util.Scanner;
 
 public class Processo extends Primitivas {
+    private Scanner in = new Scanner(System.in);
     private Programa programa;
     private String nomeDoPrograma;
     private EstadoProcesso estado;
@@ -9,7 +12,8 @@ public class Processo extends Primitivas {
     private int pc = 0;
     private long passoDeExecucaoDoOS;
     private int prioridade;
-    private int quantum;
+    private int timeout;
+    private int blockTime;
     
     public Processo(long pid, Path arquivoDoPrograma, long passoDeExecucaoDoOS, int prioridade, int quantum) throws Exception {
         this.pid = pid;
@@ -18,12 +22,12 @@ public class Processo extends Primitivas {
         this.passoDeExecucaoDoOS = passoDeExecucaoDoOS;
         this.estado = EstadoProcesso.READY;
         this.prioridade = prioridade;
-        this.quantum = quantum;
-
+        this.timeout = quantum;
     }
 
-    public EstadoProcesso processaLinha ()
+    public EstadoProcesso processaLinha (Kernel.PoliticaDeEscalonamento politica)
     {
+        this.estado = EstadoProcesso.RUNNING;
         String linha = programa.code.get(this.pc);
         // DEBUG
         if (Startup.teste) System.out.println("LINHA DE EXECUÇÃO: " + linha);
@@ -31,11 +35,14 @@ public class Processo extends Primitivas {
         String[] linhaDeComando = linha.toUpperCase().split(" ");
         String complemento = linhaDeComando[1];
         Integer labelAddress = 0;
-        int op1 = 0;
+        Integer op1 = 0;
         labelAddress = programa.labels.get(complemento);
-        op1 = complemento.startsWith("#") ? 
-            Integer.valueOf(complemento.substring(1)) :
-            Integer.valueOf(programa.data.get(complemento));
+        try {
+            op1 = complemento.startsWith("#") ? 
+                Integer.valueOf(complemento.substring(1)) :
+                Integer.valueOf(programa.data.get(complemento));
+        } catch(Exception e)
+        {}
         switch (linhaDeComando[0])
         {
             case "ADD":
@@ -43,52 +50,102 @@ public class Processo extends Primitivas {
                 this.pc++;
                 break;
             case "SUB":
-                aritimeticoSub(this.acc, op1);
+                this.acc = aritimeticoSub(this.acc, op1);
                 this.pc++;
                 break;
             case "MULT":
-                aritimeticoMult(this.acc, op1);
+                this.acc = aritimeticoMult(this.acc, op1);
                 this.pc++;
                 break;
             case "DIV":
-                aritimeticoDiv(this.acc, op1);
+                this.acc = aritimeticoDiv(this.acc, op1);
                 this.pc++;
                 break;
             case "LOAD":
-                this.acc = memoriaLoad(this.acc, op1);
+                this.acc = memoriaLoad(op1);
                 this.pc++;
                 break;
             case "STORE":
                 if (complemento.startsWith("#"))
                     throw new RuntimeException("Operação SOTRE com complemento invalido");
                 else
-                    memoriaStore(this.acc, op1);
+                    this.programa.data.put(complemento, memoriaStore(this.acc));
                 this.pc++;
                 break;
             case "BRANY":
-                saltoBRANY(this.pc, labelAddress);
+                this.pc = saltoBRANY(labelAddress);
                 break;
             case "BRPOS":
-                saltoBRPOS(this.pc, labelAddress, this.acc);
+                this.pc = saltoBRPOS(this.pc, labelAddress, this.acc);
                 break;
             case "BRZERO":
-                saltoBRZERO(this.pc, labelAddress, this.acc);
+                this.pc = saltoBRZERO(this.pc, labelAddress, this.acc);
                 break;
             case "BRNEG":
-                saltoBRNEG(this.pc, labelAddress, this.acc);
+                this.pc = saltoBRNEG(this.pc, labelAddress, this.acc);
                 break;
             case "SYSCALL":
-                break;
+                return sistemaSYSCALL(complemento);
             default:
                 throw new RuntimeException("Linha de programa invalida.");
+        }
+
+        if (politica == Kernel.PoliticaDeEscalonamento.ROUND_ROBIN)
+        {
+            this.timeout--;
+            if (this.timeout == 0) this.estado = EstadoProcesso.READY;
         }
         return this.getEstadoDoProcesso();
     }
 
     @Override
-    public void sistemaSYSCALL(int index) {
-        // TODO Auto-generated method stub
-        
+    public EstadoProcesso sistemaSYSCALL(String index) {
+        switch(index)
+        {
+            case "0":
+                return EstadoProcesso.EXIT;
+            case "1":
+                System.out.println("ACC = " + this.acc);
+                return blockTime();
+            case "2":
+                while (true)
+                {
+                    try {
+                        int value = Integer.parseInt(in.nextLine());
+                        this.acc = value;
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("Valor deve ser inteiro.");
+                    }
+                }
+                return blockTime();
+            default:
+                throw new RuntimeException("Linha de programa invalida.");
+        }
+    }
+
+    public void setQuantum(int quantum) {
+        this.timeout = quantum;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    private EstadoProcesso blockTime()
+    {
+        Random aleatorio = new Random();
+        this.blockTime = 10 + aleatorio.nextInt(11);
+        // DEBUG
+        if (Startup.teste) System.out.println("BLOCKED TIME: " + this.blockTime);
+
+        this.pc++;
+        return EstadoProcesso.BLOCKED;
+    }
+
+    public void decrementaBlockTime() {
+        this.blockTime--;
+        if (blockTime == 0) this.estado = EstadoProcesso.READY;
     }
     
     public int getPrioridade() {
@@ -115,8 +172,6 @@ public class Processo extends Primitivas {
         this.estado = novoEstado;
     }
 
-
-
     @Override
     public String toString() {
         return "Processo ["
@@ -124,7 +179,7 @@ public class Processo extends Primitivas {
             + ", nomeDoPrograma=" + nomeDoPrograma
             + ", estado=" + estado
             + ", prioridade=" + prioridade 
-            + ", quantum=" + quantum 
+            + ", timeout=" + timeout
             + ", pc=" + pc
             + ", acc=" + acc
             + ", passoDeExecucaoDoOS=" + passoDeExecucaoDoOS
