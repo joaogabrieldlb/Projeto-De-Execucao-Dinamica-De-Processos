@@ -29,6 +29,7 @@ public class Kernel
     private Queue<Processo> filaProcessosProntosMediaPrioridade = new LinkedBlockingQueue<>();
     private Queue<Processo> filaProcessosProntosBaixaPrioridade = new LinkedBlockingQueue<>();
     public static final int PRIORIDADE_PADRAO = 2;
+    public static final int ARRIVAL_TIME_PADRAO = 0;
 
     private int passoDeExecucao = 0;
 
@@ -153,6 +154,19 @@ public class Kernel
                 if (OS.verbose) System.out.println("PROGRAMA ACESSADO: " + parametro);
                 Path arquivoDoPrograma = Paths.get(appsPath, parametro);
                 int prioridade = PRIORIDADE_PADRAO;
+                int arrivalTime = ARRIVAL_TIME_PADRAO;
+
+                if(iterLP.hasNext())
+                {
+                    String complementoPrograma = iterLP.next();
+                    try {
+                        arrivalTime = Integer.parseInt(complementoPrograma);
+                    } 
+                    catch(Exception e)
+                    {
+                        System.out.println("Parametro arrivalTime invalido.\nDefinido por padrao, arrivalTime=0");
+                    }
+                }
 
                 if (iterLP.hasNext())
                 {
@@ -170,7 +184,7 @@ public class Kernel
                 }
 
                 try {
-                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, 2));
+                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, arrivalTime));
                     pidCounter++;
                 } catch (Exception e) {
                     System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
@@ -214,7 +228,7 @@ public class Kernel
 
     public void escalonador()
     {
-        imprimeFilaDeProntos();
+        imprimeEstado();
         switch(this.politicaDoEscalonador)
         {
             case PRIORIDADE_COM_PREEMPCAO:
@@ -381,18 +395,22 @@ public class Kernel
                 switch(processoAtual.getPrioridade())
                 {
                     case 0:
-                        filaProcessosProntosAltaPrioridade.add(processoAtual);
+                        if (!filaProcessosProntosAltaPrioridade.contains(processoAtual))
+                            filaProcessosProntosAltaPrioridade.add(processoAtual);
                         break;
                     case 1:
-                        filaProcessosProntosMediaPrioridade.add(processoAtual);
+                        if (!filaProcessosProntosMediaPrioridade.contains(processoAtual))
+                            filaProcessosProntosMediaPrioridade.add(processoAtual);
                         break;
                     case 2:
-                        filaProcessosProntosBaixaPrioridade.add(processoAtual);
+                        if (!filaProcessosProntosBaixaPrioridade.contains(processoAtual))
+                            filaProcessosProntosBaixaPrioridade.add(processoAtual);
                         break;
                 }
                 break;
             case ROUND_ROBIN:
-                filaProcessosProntosRR.add(processoAtual);
+                if (!filaProcessosProntosRR.contains(processoAtual))
+                    filaProcessosProntosRR.add(processoAtual);
                 break;
             default:
                 break;

@@ -23,14 +23,14 @@ Os programas para execução deverão ser colocados na pasta `apps`.
 ## Instruções
 
 Para executar o OS, executar no terminal do sistema operacional o seguinte comando:
-> `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
+> `java -jar OS.jar [-T | -P politica -L lista_de_programas arrival_time [prioridade] [-V]]]`
 
 Para recompilar o projeto, executar o seguinte script no terminal do sistema operacional (necessita JDK instalado):
 > `./compila.sh`
 
 ### Parâmetros da linha de comando:
 
-> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
+> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas arrival_time [prioridade] [-V]]]`
 
 `-T`              Executa o MODO DE TESTE (ignora demais argumentos)
 
@@ -43,10 +43,12 @@ Para recompilar o projeto, executar o seguinte script no terminal do sistema ope
 
 `-L`              Define a lista de programas a ser executado
 
-+ `lista_de_programas [prioridade]`
++ `lista_de_programas arrival_time [prioridade]`
     Indica o(s) programa(s) a ser(em) carregado(s)
 
-    + `prioridade`  Define a prioridade de execucao de cada processo (requer politica PP):
+    + `arrival_time` Define o tempo de chegada de cada processo (tempo medido em passos de execução do OS)
+
+    + `[prioridade]`   Define a prioridade de execucao de cada processo (requer politica PP):
         + `0`          prioridade ALTA
         + `1`          prioridade MEDIA
         + `2`          prioridade BAIXA
@@ -59,6 +61,6 @@ Exemplos:
 > 
 > Executa o OS em MODO DE TESTE
 
-> `java -jar OS.jar -p pp -l teste.txt -v`
+> `java -jar OS.jar -p pp -l teste.txt 1 -v`
 > 
-> Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`) com a prioridade padrão e no MODO VERBOSO)
+> Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`), com tempo de chegada de 1 passo de execução, com a prioridade padrão e no MODO VERBOSO

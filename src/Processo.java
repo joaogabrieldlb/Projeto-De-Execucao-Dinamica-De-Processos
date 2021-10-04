@@ -22,7 +22,7 @@ public class Processo extends Primitivas {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
-        this.estado = EstadoProcesso.NEW;
+        this.estado = (arrivalTime == 0) ? EstadoProcesso.READY : EstadoProcesso.NEW;
         this.prioridade = prioridade;
         this.timeout = quantum;
         this.arrivalTime = arrivalTime;
@@ -183,6 +183,10 @@ public class Processo extends Primitivas {
 
     public void setEstadoDoProcesso(EstadoProcesso novoEstado) {
         this.estado = novoEstado;
+    }
+
+    public int getArrivalTime() {
+        return arrivalTime;
     }
 
     @Override
