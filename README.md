@@ -5,11 +5,12 @@ Trabalho de desenvolvimento de um OS para a disciplina de Sistemas Operacionais 
 ## Autores
 
 Alunos:
-João Gabriel Dalla Lasta Bergamaschi
-Rafael Dias Coll Oliveira
+- João Gabriel Dalla Lasta Bergamaschi
+- Rafael Dias Coll Oliveira
 
 Prof. Fabiano Passuelo Hessel
-Turma 010 - Sistemas Operacionais
+
+Sistemas Operacionais - Turma 010
 
 ## Preparação
 
@@ -20,14 +21,14 @@ Os programas para execução deverão ser colocados na pasta `apps`.
 ## Instruções
 
 Para executar o OS, executar no terminal do sistema operacional o seguinte comando:
-> java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]
+> `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
 
 Para recompilar o projeto, executar o seguinte script no terminal do sistema operacional (necessita JDK instalado):
-> ./compila.sh
+> `./compila.sh`
 
 ### Parâmetros da linha de comando:
 
-USO: java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]
+> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
 
 -T              Executa o MODO DE TESTE
 
@@ -49,8 +50,10 @@ indefinida      prioridade padrao (2)
 -V              Habilita o MODO VERBOSO
 
 Exemplos:
-> java -jar OS.jar -t
-Executa o OS em MODO DE TESTE
+> `java -jar OS.jar -t`
+> 
+> Executa o OS em MODO DE TESTE
 
-> java -jar OS.jar -p pp -l teste.txt -v
-Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`) com a prioridade padrão e no MODO VERBOSO)
+> `java -jar OS.jar -p pp -l teste.txt -v`
+> 
+> Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`) com a prioridade padrão e no MODO VERBOSO)
