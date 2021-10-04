@@ -32,24 +32,27 @@ Para recompilar o projeto, executar o seguinte script no terminal do sistema ope
 
 > USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
 
--T              Executa o MODO DE TESTE (ignora demais argumentos)
+`-T`              Executa o MODO DE TESTE (ignora demais argumentos)
 
--P              Define a politica de escalonamento
-politica        Escolhe a politica de escalonamento:
-PP              PRIORIDADE COM PREEMPCAO
-RR quantum      ROUND ROBIN com quantum
-quantum         Define numero de passos executado por cada processo
+`-P`              Define a politica de escalonamento
 
--L              Define a lista de programas a ser executado
-lista_de_programas [prioridade]
-                Indica o(s) programa(s) a ser(em) carregado(s)
-prioridade      Define a prioridade de execucao de cada processo (requer politica PP):
-0               prioridade ALTA
-1               prioridade MEDIA
-2               prioridade BAIXA
-indefinida      prioridade padrao (2)
+`politica`        Escolhe a politica de escalonamento:
++ `PP`             PRIORIDADE COM PREEMPCAO
++ `RR quantum`     ROUND ROBIN com quantum
+    + `quantum`     Define numero de passos executado por cada processo
 
--V              Habilita o MODO VERBOSO
+`-L`              Define a lista de programas a ser executado
+
++ `lista_de_programas [prioridade]`
+    Indica o(s) programa(s) a ser(em) carregado(s)
+
+    + `prioridade`  Define a prioridade de execucao de cada processo (requer politica PP):
+        + `0`          prioridade ALTA
+        + `1`          prioridade MEDIA
+        + `2`          prioridade BAIXA
+        + `indefinida` prioridade padrao (2)
+
+`-V`              Habilita o MODO VERBOSO
 
 Exemplos:
 > `java -jar OS.jar -t`
