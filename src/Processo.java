@@ -22,7 +22,7 @@ public class Processo extends Primitivas {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
-        this.estado = EstadoProcesso.READY;
+        this.estado = EstadoProcesso.NEW;
         this.prioridade = prioridade;
         this.timeout = quantum;
         this.arrivalTime = arrivalTime;
@@ -135,9 +135,12 @@ public class Processo extends Primitivas {
         this.timeout = timeout;
     }
 
-    public void computaTempoDoOS() {
+    public EstadoProcesso computaTempoDoOS(int passoDeExecucaoDoOS) {
         this.turnaroundTime++;
         switch (this.estado) {
+            case NEW:
+                if (this.arrivalTime <= passoDeExecucaoDoOS) this.estado = EstadoProcesso.READY;
+                break;
             case READY:
                 this.waitingTime++;
                 break;
@@ -147,6 +150,7 @@ public class Processo extends Primitivas {
             default:
                 break;
         }
+        return this.estado;
     }
 
     private EstadoProcesso blockTime()

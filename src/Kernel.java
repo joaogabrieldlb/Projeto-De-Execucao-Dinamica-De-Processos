@@ -170,7 +170,7 @@ public class Kernel
                 }
 
                 try {
-                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, passoDeExecucao));
+                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, 2));
                     pidCounter++;
                 } catch (Exception e) {
                     System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
@@ -316,12 +316,14 @@ public class Kernel
         passoDeExecucao++;
         listaDeProcessos.stream()
             .filter(p -> !p.getEstadoDoProcesso().equals(EstadoProcesso.EXIT))
-            .forEach(p -> p.computaTempoDoOS());
+            .forEach(p -> {
+                if (p.computaTempoDoOS(passoDeExecucao).equals(EstadoProcesso.READY)) insereProcessoNaFilaDePronto(p);
+            });
     }
 
     private void imprimeEstado()
     {
-        System.out.println("=========== ESTADO DOS PROCESSOS ===========");
+        System.out.println("=========== ESTADO DOS PROCESSOS =========== PASSO DE EXECUCAO DO OS = " + passoDeExecucao);
         listaDeProcessos.forEach(System.out::println);
         System.out.println("============================================");
         // DEBUG

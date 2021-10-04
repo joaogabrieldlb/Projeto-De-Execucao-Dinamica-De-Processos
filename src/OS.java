@@ -2,9 +2,7 @@ import java.security.InvalidParameterException;
 
 public class OS {
     
-    // Modo de teste
     public static boolean verbose = false;
-    // public static final String appsDirectory = "./../apps/";
     public static final String appsDirectory = "apps";
     public static void main(String[] args)
     {
