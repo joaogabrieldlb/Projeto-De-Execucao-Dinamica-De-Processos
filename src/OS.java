@@ -18,7 +18,7 @@ public class OS {
         {
             OS.verbose = true;
             System.out.println("================ MODO TESTE ================");
-            String[] argsTeste = {"oi1", "-1l", "-oi2", "-p", "pp", "10", "-l", "d", "teste.txt", "0", "Prog1.txt", "1", "Prog1.txt", "0","Prog2.txt", "0", "Prog3.txt", "2", "-v"};
+            String[] argsTeste = {"oi1", "-1l", "-oi2", "-p", "pp", "10", "-l", "d", "teste.txt", "Prog1.txt", "1", "Prog1.txt", "0","Prog2.txt", "0", "Prog3.txt", "2", "-v"};
             Kernel testeOs = new Kernel(argsTeste);
             testeOs.escalonador();
             return;
@@ -65,7 +65,7 @@ public class OS {
 
     public static void imprimeLinhaDeComando()
     {
-        System.out.println("\nUSO: java -jar OS [-T | -P politica -L lista_de_programas [prioridade] [-V]]]");
+        System.out.println("\nUSO: java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]");
     }
 
 }

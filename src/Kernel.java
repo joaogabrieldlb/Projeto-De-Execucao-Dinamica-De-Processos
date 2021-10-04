@@ -313,6 +313,7 @@ public class Kernel
     }
 
     private void atualizaTempos() {
+        passoDeExecucao++;
         listaDeProcessos.stream()
             .filter(p -> !p.getEstadoDoProcesso().equals(EstadoProcesso.EXIT))
             .forEach(p -> p.computaTempoDoOS());
