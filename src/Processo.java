@@ -10,27 +10,27 @@ public class Processo extends Primitivas {
     private long pid;
     private int acc = 0;
     private int pc = 0;
-    private long passoDeExecucaoDoOS;
     private int prioridade;
     private int timeout;
     private int blockTime;
+    private int waitingTime;
+    private int processingTime;
+    private int turnaroundTime;
     
-    public Processo(long pid, Path arquivoDoPrograma, long passoDeExecucaoDoOS, int prioridade, int quantum) throws Exception {
+    public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum) throws Exception {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
-        this.passoDeExecucaoDoOS = passoDeExecucaoDoOS;
         this.estado = EstadoProcesso.READY;
         this.prioridade = prioridade;
         this.timeout = quantum;
     }
 
-    public EstadoProcesso processaLinha (Kernel.PoliticaDeEscalonamento politica)
+    public EstadoProcesso processaLinha(Kernel.PoliticaDeEscalonamento politica)
     {
-        this.estado = EstadoProcesso.RUNNING;
         String linha = programa.code.get(this.pc);
         // DEBUG
-        if (Startup.teste) System.out.println("LINHA DE EXECUÇÃO: " + linha);
+        if (Startup.teste) System.out.println("PID: " + this.pid + "; LINHA DE EXECUÇÃO: " + linha);
 
         String[] linhaDeComando = linha.toUpperCase().split(" ");
         String complemento = linhaDeComando[1];
@@ -67,7 +67,7 @@ public class Processo extends Primitivas {
                 break;
             case "STORE":
                 if (complemento.startsWith("#"))
-                    throw new RuntimeException("Operação SOTRE com complemento invalido");
+                    throw new RuntimeException("Operação STORE com complemento invalido");
                 else
                     this.programa.data.put(complemento, memoriaStore(this.acc));
                 this.pc++;
@@ -111,6 +111,7 @@ public class Processo extends Primitivas {
                 while (true)
                 {
                     try {
+                        System.out.print("INPUT: ");
                         int value = Integer.parseInt(in.nextLine());
                         this.acc = value;
                         break;
@@ -130,6 +131,20 @@ public class Processo extends Primitivas {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public void computaTempoDoOS() {
+        this.turnaroundTime++;
+        switch (this.estado) {
+            case READY:
+                this.waitingTime++;
+                break;
+            case RUNNING:
+                this.processingTime++;
+                break;
+            default:
+                break;
+        }
     }
 
     private EstadoProcesso blockTime()
@@ -156,14 +171,6 @@ public class Processo extends Primitivas {
         return programa;
     }
 
-    public long getUltimoPassoDoOS() {
-        return passoDeExecucaoDoOS;
-    }
-
-    public void setUltimoPassoDoOS(int ultimoPassoDoOS) {
-        this.passoDeExecucaoDoOS = ultimoPassoDoOS;
-    }
-
     public EstadoProcesso getEstadoDoProcesso() {
         return estado;
     }
@@ -180,9 +187,12 @@ public class Processo extends Primitivas {
             + ", estado=" + estado
             + ", prioridade=" + prioridade 
             + ", timeout=" + timeout
+            + ", blocktime=" + blockTime
+            + ", waitingTime=" + waitingTime
+            + ", processingTime=" + processingTime
+            + ", turnaroundTime=" + turnaroundTime
             + ", pc=" + pc
             + ", acc=" + acc
-            + ", passoDeExecucaoDoOS=" + passoDeExecucaoDoOS
             + "]";
     }
 }

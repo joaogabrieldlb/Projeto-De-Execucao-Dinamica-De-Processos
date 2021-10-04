@@ -108,7 +108,12 @@ public class Kernel
         {
             try {
                 String posicao = listaDeParametros.get(i);
-                if (posicao.charAt(0) == '-') throw new IndexOutOfBoundsException("Fim do parametro -l.");
+                if ((posicao.charAt(0) == '-')) throw new IndexOutOfBoundsException("Fim do parametro -l.");
+                if (i == listaDeParametros.size() - 1)
+                {
+                    i++;
+                    throw new IndexOutOfBoundsException("Fim da lista de parametros.");
+                }
             } catch (Exception e) {
                 indexLFim = i;
                 break;
@@ -157,7 +162,7 @@ public class Kernel
                 }
 
                 try {
-                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, passoDeExecucao, prioridade, quantum));
+                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum));
                     pidCounter++;
                 } catch (Exception e) {
                     System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
@@ -168,79 +173,9 @@ public class Kernel
                 System.err.println("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
             }
         }
-        
-        // switch(politicaDoEscalonador)
-        // {
-        //     case PRIORIDADE_COM_PREEMPCAO:
-        //         listaDeProcessos.stream()
-        //             .filter(p -> p.getPrioridade() == 0)
-        //             .forEach(p -> filaProcessosProntosAltaPrioridade.add(p));
-        //         listaDeProcessos.stream()
-        //             .filter(p -> p.getPrioridade() == 1)
-        //             .forEach(p -> filaProcessosProntosMediaPrioridade.add(p));
-        //         listaDeProcessos.stream()
-        //             .filter(p -> p.getPrioridade() == 2)
-        //             .forEach(p -> filaProcessosProntosBaixaPrioridade.add(p));
-        //         break;
-        //     case ROUND_ROBIN:
-        //         filaProcessosProntosRR.addAll(listaDeProcessos);
-        //         break;
-        // }
-    }
 
-    public void run ()
-    {
-        do
-        {
-            Processo processoAtual = escalonador();
-            if(processoAtual != null)
-            {
-                processoAtual.setTimeout(this.quantum);
-                // DEBUG
-                if (Startup.teste) System.out.println("NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
-                // processoAtual.processaLinha(); //void
-                processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador)); //return estado
-                while (processoAtual.getEstadoDoProcesso() == EstadoProcesso.RUNNING)
-                {
-                    processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador));
-                    atualizaEstados();
-                }
-            }
-            else
-            {
-                atualizaEstados();
-            }
-        }
-        while (!isTodosProcessosEncerrados());
-        imprimeEstado();
-        System.out.println("FIM DO OS!");
-        return;
-
-
-    }
-
-    private void atualizaEstados() {
-        listaDeProcessos.stream()
-            .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.BLOCKED))
-            .forEach(p -> p.decrementaBlockTime());
-    }
-
-    private void imprimeEstado()
-    {
-        // TODO: Imprimir estado do OS e da aplicação
-        listaDeProcessos.forEach(System.out::println);
-    }
-
-    private boolean isTodosProcessosEncerrados ()
-    {
-        return listaDeProcessos.stream()
-            .map(p -> p.getEstadoDoProcesso())
-            .allMatch(ep -> ep.equals(EstadoProcesso.EXIT));
-    }
-
-    public Processo escalonador()
-    {
-        switch(politicaDoEscalonador)
+        // Popula fila de pronto
+        switch(this.politicaDoEscalonador)
         {
             case PRIORIDADE_COM_PREEMPCAO:
                 listaDeProcessos.stream()
@@ -258,29 +193,177 @@ public class Kernel
                     .forEach(p -> {
                         if (!filaProcessosProntosBaixaPrioridade.contains(p)) filaProcessosProntosBaixaPrioridade.add(p);
                     });
-                if(!filaProcessosProntosAltaPrioridade.isEmpty()) 
-                    return filaProcessosProntosAltaPrioridade.poll();
-                if(!filaProcessosProntosMediaPrioridade.isEmpty()) 
-                    return filaProcessosProntosMediaPrioridade.poll();
-                if(!filaProcessosProntosBaixaPrioridade.isEmpty()) 
-                    return filaProcessosProntosBaixaPrioridade.poll();
-                return null;
+                break;
             case ROUND_ROBIN:
                 listaDeProcessos.stream()
-                .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY))
-                .forEach(p -> {
-                    if (!filaProcessosProntosRR.contains(p)) filaProcessosProntosRR.add(p);
-                });
-                return filaProcessosProntosRR.poll();
-            default:
-                return null;
+                    .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.READY))
+                    .forEach(p -> {
+                        if (!filaProcessosProntosRR.contains(p)) filaProcessosProntosRR.add(p);
+                    });
+                break;
         }
     }
 
-	public static void imprimeHelp()
+    public void escalonador()
     {
-        System.out.println("Uso do OS:");
-        System.out.println("Modo de teste: \"java Startup -t\"");
-        System.out.println("Modo normal: \"java Startup -p [politica | quantum] -l [lista de programas | prioridade]\"");
-	}
+        switch(this.politicaDoEscalonador)
+        {
+            case PRIORIDADE_COM_PREEMPCAO:
+                escalonadorPP();
+                break;
+            case ROUND_ROBIN:
+                escalonadorRR();
+                break;
+            default:
+                break;
+        }
+        imprimeEstado();
+        System.out.println("FIM DO OS!");
+        return;
+    }
+
+    private void escalonadorPP() {
+        do {
+            Processo processoAtual = consultaProcessoPP();
+            if(processoAtual != null)
+            {
+                // DEBUG
+                if (Startup.teste) System.out.println("> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
+                do {
+                    atualizaBlockTime();
+                    processoAtual.setEstadoDoProcesso(EstadoProcesso.RUNNING);
+                    atualizaTempos();
+                    processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador));
+                    imprimeEstado();
+                    // PREEMPTACAO
+                    if (!isMaiorPrioridade(processoAtual) && 
+                        processoAtual.getEstadoDoProcesso() != EstadoProcesso.BLOCKED) 
+                    {
+                        processoAtual.setEstadoDoProcesso(EstadoProcesso.READY);
+                        insereProcessoNaFilaDePronto(processoAtual);
+                    }
+                } while (processoAtual.getEstadoDoProcesso() == EstadoProcesso.RUNNING);
+            } 
+            else
+            {
+                atualizaBlockTime();
+                atualizaTempos();
+                imprimeEstado();
+            }
+        } while (!isTodosProcessosEncerrados());
+    }
+
+    private void escalonadorRR() {
+        do {
+            Processo processoAtual = consultaProcessoRR();
+            if(processoAtual != null)
+            {
+                processoAtual.setTimeout(this.quantum);
+                // DEBUG
+                if (Startup.teste) System.out.println("=> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
+                do {
+                    atualizaBlockTime();
+                    processoAtual.setEstadoDoProcesso(EstadoProcesso.RUNNING);
+                    atualizaTempos();
+                    processoAtual.setEstadoDoProcesso(processoAtual.processaLinha(politicaDoEscalonador));
+                    imprimeEstado();
+                    if (processoAtual.getEstadoDoProcesso() == EstadoProcesso.READY) insereProcessoNaFilaDePronto(processoAtual);
+                } while (processoAtual.getEstadoDoProcesso() == EstadoProcesso.RUNNING);
+            }
+            else
+            {
+                atualizaBlockTime();
+                atualizaTempos();
+                imprimeEstado();
+            }
+        } while (!isTodosProcessosEncerrados());
+    }
+
+
+    private boolean isMaiorPrioridade(Processo processoAtual)
+    {
+        switch(processoAtual.getPrioridade())
+        {
+            case 0:
+                return true;
+            case 1:
+                return filaProcessosProntosAltaPrioridade.isEmpty();
+            case 2:
+                return (filaProcessosProntosAltaPrioridade.isEmpty() && 
+                    filaProcessosProntosMediaPrioridade.isEmpty());
+        }
+        return false;
+    }
+
+    private void atualizaBlockTime() {
+        listaDeProcessos.stream()
+            .filter(p -> p.getEstadoDoProcesso().equals(EstadoProcesso.BLOCKED))
+            .forEach(p -> {
+                p.decrementaBlockTime();
+                if (p.getEstadoDoProcesso() == EstadoProcesso.READY) insereProcessoNaFilaDePronto(p);
+            });
+    }
+
+    private void atualizaTempos() {
+        listaDeProcessos.stream()
+            .filter(p -> !p.getEstadoDoProcesso().equals(EstadoProcesso.EXIT))
+            .forEach(p -> p.computaTempoDoOS());
+    }
+
+    private void imprimeEstado()
+    {
+        System.out.println("=========== ESTADO DOS PROCESSOS ============");
+        listaDeProcessos.forEach(System.out::println);
+        System.out.println("=============================================");
+    }
+
+    private boolean isTodosProcessosEncerrados ()
+    {
+        return listaDeProcessos.stream()
+            .map(p -> p.getEstadoDoProcesso())
+            .allMatch(ep -> ep.equals(EstadoProcesso.EXIT));
+    }
+
+    public Processo consultaProcessoPP()
+    {
+        if(!filaProcessosProntosAltaPrioridade.isEmpty())
+            return filaProcessosProntosAltaPrioridade.poll();
+        if(!filaProcessosProntosMediaPrioridade.isEmpty())
+            return filaProcessosProntosMediaPrioridade.poll();
+        if(!filaProcessosProntosBaixaPrioridade.isEmpty())
+            return filaProcessosProntosBaixaPrioridade.poll();
+        return null;
+    }
+
+    public Processo consultaProcessoRR()
+    {
+        return filaProcessosProntosRR.poll();
+    }
+
+    public void insereProcessoNaFilaDePronto(Processo processoAtual)
+    {
+        if (!processoAtual.getEstadoDoProcesso().equals(EstadoProcesso.READY)) 
+            return;
+        switch (politicaDoEscalonador) {
+            case PRIORIDADE_COM_PREEMPCAO:
+                switch(processoAtual.getPrioridade())
+                {
+                    case 0:
+                        filaProcessosProntosAltaPrioridade.add(processoAtual);
+                        break;
+                    case 1:
+                        filaProcessosProntosMediaPrioridade.add(processoAtual);
+                        break;
+                    case 2:
+                        filaProcessosProntosBaixaPrioridade.add(processoAtual);
+                        break;
+                }
+                break;
+            case ROUND_ROBIN:
+                filaProcessosProntosRR.add(processoAtual);
+                break;
+            default:
+                break;
+        }
+    }
 }
