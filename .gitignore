@@ -3,7 +3,7 @@
 
 ### Java ###
 # Compiled class file
-bin/
+#bin/
 *.class
 
 # Log file
@@ -16,7 +16,7 @@ bin/
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear

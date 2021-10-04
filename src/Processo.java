@@ -16,21 +16,23 @@ public class Processo extends Primitivas {
     private int waitingTime;
     private int processingTime;
     private int turnaroundTime;
+    private int arrivalTime;
     
-    public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum) throws Exception {
+    public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum, int arrivalTime) throws Exception {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
         this.estado = EstadoProcesso.READY;
         this.prioridade = prioridade;
         this.timeout = quantum;
+        this.arrivalTime = arrivalTime;
     }
 
     public EstadoProcesso processaLinha(Kernel.PoliticaDeEscalonamento politica)
     {
         String linha = programa.code.get(this.pc);
         // DEBUG
-        if (Startup.teste) System.out.println("PID: " + this.pid + "; LINHA DE EXECUÇÃO: " + linha);
+        if (OS.verbose) System.out.println("PID: " + this.pid + "> LINHA DE EXECUCAO> " + linha);
 
         String[] linhaDeComando = linha.toUpperCase().split(" ");
         String complemento = linhaDeComando[1];
@@ -105,18 +107,18 @@ public class Processo extends Primitivas {
             case "0":
                 return EstadoProcesso.EXIT;
             case "1":
-                System.out.println("ACC = " + this.acc);
+                System.out.println("OUTPUT> " + this.acc);
                 return blockTime();
             case "2":
                 while (true)
                 {
                     try {
-                        System.out.print("INPUT: ");
+                        System.out.print("INPUT> ");
                         int value = Integer.parseInt(in.nextLine());
                         this.acc = value;
                         break;
                     } catch (Exception e) {
-                        System.out.println("Valor deve ser inteiro.");
+                        System.out.println("ERRO. Valor deve ser inteiro.");
                     }
                 }
                 return blockTime();
@@ -152,7 +154,7 @@ public class Processo extends Primitivas {
         Random aleatorio = new Random();
         this.blockTime = 10 + aleatorio.nextInt(11);
         // DEBUG
-        if (Startup.teste) System.out.println("BLOCKED TIME: " + this.blockTime);
+        if (OS.verbose) System.out.println("BLOCKED TIME: " + this.blockTime);
 
         this.pc++;
         return EstadoProcesso.BLOCKED;
@@ -191,6 +193,7 @@ public class Processo extends Primitivas {
             + ", waitingTime=" + waitingTime
             + ", processingTime=" + processingTime
             + ", turnaroundTime=" + turnaroundTime
+            + ", arrivalTime=" + arrivalTime
             + ", pc=" + pc
             + ", acc=" + acc
             + "]";

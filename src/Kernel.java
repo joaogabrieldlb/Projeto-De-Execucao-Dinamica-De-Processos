@@ -30,11 +30,11 @@ public class Kernel
     private Queue<Processo> filaProcessosProntosBaixaPrioridade = new LinkedBlockingQueue<>();
     public static final int PRIORIDADE_PADRAO = 2;
 
-    private long passoDeExecucao = 0;
+    private int passoDeExecucao = 0;
 
     public Kernel(String[] args)
     {
-        this.appsPath = Startup.appsDirectory;
+        this.appsPath = OS.appsDirectory;
         // Verificacao de existencia de argumentos
         if (args.length == 0)
         {
@@ -47,11 +47,19 @@ public class Kernel
             args[i] = args[i].toUpperCase();
         }
         List<String> listaDeParametros = new ArrayList<>(Arrays.asList(args));
+
+        int indexV = listaDeParametros.indexOf("-V");
+        if (indexV >= 0)
+        {
+            OS.verbose = true;
+            System.out.println("=============== MODO VERBOSO ===============");
+        }
+
         // DEBUG
-        if (Startup.teste) System.out.println("ARGS: "+ listaDeParametros);
+        if (OS.verbose) System.out.println("ARGS: "+ listaDeParametros);
         
         // DEBUG - mostra index do -p
-        if (Startup.teste) System.out.println("INDICE DO PARAMETRO -P: " + listaDeParametros.indexOf("-P"));
+        if (OS.verbose) System.out.println("INDICE DO PARAMETRO -P: " + listaDeParametros.indexOf("-P"));
 
         // Definicao da politica de escalonamento (-P)
         int indexP = listaDeParametros.indexOf("-P");
@@ -73,16 +81,16 @@ public class Kernel
                 case "PP":
                     this.politicaDoEscalonador = PoliticaDeEscalonamento.PRIORIDADE_COM_PREEMPCAO;
                     //DEBUG
-                    if (Startup.teste) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
+                    if (OS.verbose) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
                     break;
                 case "RR":
                     this.politicaDoEscalonador = PoliticaDeEscalonamento.ROUND_ROBIN;
                     //DEBUG
-                    if (Startup.teste) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
+                    if (OS.verbose) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
                     try {
                         this.quantum = Integer.parseInt(listaDeParametros.get(indexP + 2));
                         // DEBUG
-                        if (Startup.teste) System.out.println("VALOR DO QUANTUM: " + this.quantum);
+                        if (OS.verbose) System.out.println("VALOR DO QUANTUM: " + this.quantum);
                         if (this.quantum <= 0) throw new InvalidParameterException("Valor menor ou igual a zero.");
                     } catch (Exception e) {
                         throw new InvalidParameterException("Quantum invalido. " + e.getMessage());
@@ -100,7 +108,7 @@ public class Kernel
             throw new InvalidParameterException("Parametro -l nao encontrado.");
         }
         // DEBUG
-        if (Startup.teste) System.out.println("INDICE DO PARAMETRO -L: " + indexL);
+        if (OS.verbose) System.out.println("INDICE DO PARAMETRO -L: " + indexL);
 
         int indexLInicio;
         int indexLFim;
@@ -120,8 +128,8 @@ public class Kernel
             }
         }
         // DEBUG
-        if (Startup.teste) System.out.println("INDEXL INICIO: " + indexLInicio);
-        if (Startup.teste) System.out.println("INDEXL FIM: " + indexLFim);
+        if (OS.verbose) System.out.println("INDEXL INICIO: " + indexLInicio);
+        if (OS.verbose) System.out.println("INDEXL FIM: " + indexLFim);
 
         List<String> listaDeProgramas = listaDeParametros.subList(indexLInicio, indexLFim);
         if (listaDeProgramas.isEmpty())
@@ -129,7 +137,7 @@ public class Kernel
             throw new InvalidParameterException("Lista de programas vazia.");
         }
         // DEBUG
-        if (Startup.teste) System.out.println("LISTA DE PROGRAMAS: " + listaDeProgramas);
+        if (OS.verbose) System.out.println("LISTA DE PROGRAMAS: " + listaDeProgramas);
 
         // Configuaracao da fila de processos
         ListIterator<String> iterLP = listaDeProgramas.listIterator();
@@ -137,12 +145,12 @@ public class Kernel
         {
             String parametro = iterLP.next();
             // DEBUG
-            if (Startup.teste) System.out.println("PARAMETRO: " + parametro);
+            if (OS.verbose) System.out.println("PARAMETRO: " + parametro);
 
             if (Files.isReadable(Paths.get(appsPath, parametro)))
             {
                 // DEBUG
-                if (Startup.teste) System.out.println("PROGRAMA ACESSADO: " + parametro);
+                if (OS.verbose) System.out.println("PROGRAMA ACESSADO: " + parametro);
                 Path arquivoDoPrograma = Paths.get(appsPath, parametro);
                 int prioridade = PRIORIDADE_PADRAO;
 
@@ -162,15 +170,15 @@ public class Kernel
                 }
 
                 try {
-                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum));
+                    listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, passoDeExecucao));
                     pidCounter++;
                 } catch (Exception e) {
-                    System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
+                    throw new InvalidParameterException("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
                 }
             }
             else
             {
-                System.err.println("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
+                throw new InvalidParameterException("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
             }
         }
 
@@ -206,6 +214,7 @@ public class Kernel
 
     public void escalonador()
     {
+        imprimeFilaDeProntos();
         switch(this.politicaDoEscalonador)
         {
             case PRIORIDADE_COM_PREEMPCAO:
@@ -217,8 +226,7 @@ public class Kernel
             default:
                 break;
         }
-        imprimeEstado();
-        System.out.println("FIM DO OS!");
+        System.out.println("================ FIM DO OS =================");
         return;
     }
 
@@ -228,7 +236,7 @@ public class Kernel
             if(processoAtual != null)
             {
                 // DEBUG
-                if (Startup.teste) System.out.println("> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
+                if (OS.verbose) System.out.println("> NOVO PROCESSO EM EXECUCAO: " + processoAtual);
                 do {
                     atualizaBlockTime();
                     processoAtual.setEstadoDoProcesso(EstadoProcesso.RUNNING);
@@ -260,7 +268,7 @@ public class Kernel
             {
                 processoAtual.setTimeout(this.quantum);
                 // DEBUG
-                if (Startup.teste) System.out.println("=> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
+                if (OS.verbose) System.out.println("=> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
                 do {
                     atualizaBlockTime();
                     processoAtual.setEstadoDoProcesso(EstadoProcesso.RUNNING);
@@ -312,9 +320,30 @@ public class Kernel
 
     private void imprimeEstado()
     {
-        System.out.println("=========== ESTADO DOS PROCESSOS ============");
+        System.out.println("=========== ESTADO DOS PROCESSOS ===========");
         listaDeProcessos.forEach(System.out::println);
-        System.out.println("=============================================");
+        System.out.println("============================================");
+        // DEBUG
+        if (OS.verbose) imprimeFilaDeProntos();
+    }
+
+    private void imprimeFilaDeProntos()
+    {
+        System.out.println("============= FILA DE PRONTOS ==============");
+        switch(this.politicaDoEscalonador)
+        {
+            case PRIORIDADE_COM_PREEMPCAO:
+                filaProcessosProntosAltaPrioridade.forEach(System.out::println);
+                filaProcessosProntosMediaPrioridade.forEach(System.out::println);
+                filaProcessosProntosBaixaPrioridade.forEach(System.out::println);
+                break;
+            case ROUND_ROBIN:
+                filaProcessosProntosRR.forEach(System.out::println);
+                break;
+            default:
+                break;
+        }
+        System.out.println("============================================");
     }
 
     private boolean isTodosProcessosEncerrados ()
@@ -324,7 +353,7 @@ public class Kernel
             .allMatch(ep -> ep.equals(EstadoProcesso.EXIT));
     }
 
-    public Processo consultaProcessoPP()
+    private Processo consultaProcessoPP()
     {
         if(!filaProcessosProntosAltaPrioridade.isEmpty())
             return filaProcessosProntosAltaPrioridade.poll();
@@ -335,7 +364,7 @@ public class Kernel
         return null;
     }
 
-    public Processo consultaProcessoRR()
+    private Processo consultaProcessoRR()
     {
         return filaProcessosProntosRR.poll();
     }
