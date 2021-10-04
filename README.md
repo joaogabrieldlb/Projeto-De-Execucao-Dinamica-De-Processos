@@ -15,7 +15,9 @@ Sistemas Operacionais - Turma 010
 ## Preparação
 
 Para execução do programa é necessário possuir instalado a plataforma Java JRE (Java Runtime Environment) na versão 8 ou superior.
+
 Para compilação do programa é necessário possuir instalado o JDK (Java Development Kit) na versão 8 ou superior.
+
 Os programas para execução deverão ser colocados na pasta `apps`.
 
 ## Instruções
@@ -30,7 +32,7 @@ Para recompilar o projeto, executar o seguinte script no terminal do sistema ope
 
 > USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]`
 
--T              Executa o MODO DE TESTE
+-T              Executa o MODO DE TESTE (ignora demais argumentos)
 
 -P              Define a politica de escalonamento
 politica        Escolhe a politica de escalonamento:

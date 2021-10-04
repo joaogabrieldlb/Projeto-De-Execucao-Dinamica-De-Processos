@@ -25,7 +25,7 @@ public class OS {
         }
 
         Kernel polvoOs = null;
-        // Trata exceções do construtor
+        // Trata exceções do construtor e de execução
         try {
             polvoOs = new Kernel(args);
             polvoOs.escalonador();
@@ -44,7 +44,7 @@ public class OS {
         System.out.println("Inicia o OS.");
         imprimeLinhaDeComando();
         System.out.println();
-        System.out.println("-T\t\tExecuta o MODO DE TESTE");
+        System.out.println("-T\t\tExecuta o MODO DE TESTE (ignora demais argumentos)");
         System.out.println();
         System.out.println("-P\t\tDefine a politica de escalonamento");
         System.out.println("politica\tEscolhe a politica de escalonamento:");

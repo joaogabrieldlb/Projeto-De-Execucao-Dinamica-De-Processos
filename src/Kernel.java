@@ -173,12 +173,12 @@ public class Kernel
                     listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, passoDeExecucao));
                     pidCounter++;
                 } catch (Exception e) {
-                    throw new InvalidParameterException("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
+                    System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
                 }
             }
             else
             {
-                throw new InvalidParameterException("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
+                System.err.println("Erro ao carregar \"" + parametro + "\": arquivo indisponivel.");
             }
         }
 
