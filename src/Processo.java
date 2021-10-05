@@ -1,4 +1,5 @@
 import java.nio.file.Path;
+import java.util.EnumMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -17,6 +18,7 @@ public class Processo extends Primitivas {
     private int processingTime;
     private int turnaroundTime;
     private int arrivalTime;
+    private EnumMap<EstadoProcesso, Integer> tempoDeEstados = new EnumMap<>(EstadoProcesso.class);
     
     public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum, int arrivalTime) throws Exception {
         this.pid = pid;
@@ -136,6 +138,8 @@ public class Processo extends Primitivas {
     }
 
     public EstadoProcesso computaTempoDoOS(int passoDeExecucaoDoOS) {
+        tempoDeEstados.computeIfPresent(this.estado, (k, v) -> v + 1);
+        tempoDeEstados.putIfAbsent(this.estado, 1);
         this.turnaroundTime++;
         switch (this.estado) {
             case NEW:
@@ -205,5 +209,10 @@ public class Processo extends Primitivas {
             + ", pc=" + pc
             + ", acc=" + acc
             + "]";
+    }
+
+    public String tempoDeEstadoString()
+    {
+        return "Tempos de Estados do Processo: " + tempoDeEstados.toString();
     }
 }

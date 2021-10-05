@@ -1,6 +1,6 @@
 # TP1 - Projeto de execução dinâmica de processos
 
-Trabalho de desenvolvimento de um OS para a disciplina de Sistemas Operacionais do curso de Sistemas de Informação da PUCRS.
+Trabalho de desenvolvimento de um OS com políticas de escalonamento definívies para a disciplina de Sistemas Operacionais do curso de Sistemas de Informação da PUCRS.
 
 ## Autores
 
@@ -63,4 +63,4 @@ Exemplos:
 
 > `java -jar OS.jar -p pp -l teste.txt 1 -v`
 > 
-> Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`), com tempo de chegada de 1 passo de execução, com a prioridade padrão e no MODO VERBOSO
+> Executa o OS com a política de PRIORIDADE COM PREEMPÇÃO, o programa "teste.txt" (presente na pasta `apps`), com tempo de chegada no passo de execução 1, com a prioridade padrão e no MODO VERBOSO

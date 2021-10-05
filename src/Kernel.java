@@ -161,10 +161,12 @@ public class Kernel
                     String complementoPrograma = iterLP.next();
                     try {
                         arrivalTime = Integer.parseInt(complementoPrograma);
+                        if (arrivalTime < 0) throw new InvalidParameterException("ArrivalTime nao pode ser negativo.");
                     } 
                     catch(Exception e)
                     {
-                        System.out.println("Parametro arrivalTime invalido.\nDefinido por padrao, arrivalTime=0");
+                        System.err.println("Parametro arrivalTime invalido." + e.getMessage() + "\nDefinido valor padrao: arrivalTime=" + ARRIVAL_TIME_PADRAO);
+                        iterLP.previous();
                     }
                 }
 
@@ -240,6 +242,7 @@ public class Kernel
             default:
                 break;
         }
+        imprimeEstadoFinal();        
         System.out.println("================ FIM DO OS =================");
         return;
     }
@@ -342,6 +345,12 @@ public class Kernel
         System.out.println("============================================");
         // DEBUG
         if (OS.verbose) imprimeFilaDeProntos();
+    }
+
+    private void imprimeEstadoFinal()
+    {
+        System.out.println("============ ESTADO FINAL DO OS ============ ULTIMO PASSO DE EXECUCAO DO OS = " + passoDeExecucao);
+        listaDeProcessos.forEach(p -> System.out.println(p.toString() + "\n" + p.tempoDeEstadoString()));
     }
 
     private void imprimeFilaDeProntos()
