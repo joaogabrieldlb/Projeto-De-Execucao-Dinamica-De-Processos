@@ -23,14 +23,14 @@ Os programas para execução deverão ser colocados na pasta `apps`.
 ## Instruções
 
 Para executar o OS, executar no terminal do sistema operacional o seguinte comando:
-> `java -jar OS.jar [-T | -P politica -L lista_de_programas arrival_time [prioridade] [-V]]]`
+> `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]]`
 
 Para recompilar o projeto, executar o seguinte script no terminal do sistema operacional (necessita JDK instalado):
 > `./compila.sh`
 
 ### Parâmetros da linha de comando:
 
-> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas arrival_time [prioridade] [-V]]]`
+> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]]`
 
 `-T`              Executa o MODO DE TESTE (ignora demais argumentos)
 
@@ -43,12 +43,13 @@ Para recompilar o projeto, executar o seguinte script no terminal do sistema ope
 
 `-L`              Define a lista de programas a ser executado
 
-+ `lista_de_programas arrival_time [prioridade]`
++ `lista_de_programas [arrival_time] [prioridade]`
     Indica o(s) programa(s) a ser(em) carregado(s)
 
-    + `arrival_time` Define o tempo de chegada de cada processo (tempo medido em passos de execução do OS)
+    + `arrival_time` Define o tempo de chegada de cada processo (tempo do passos de execucao do OS)
+        + `indefinido` tempo de execucao padrao (0)
 
-    + `[prioridade]`   Define a prioridade de execucao de cada processo (requer politica PP):
+    + `prioridade`   Define a prioridade de execucao de cada processo (requer politica PP):
         + `0`          prioridade ALTA
         + `1`          prioridade MEDIA
         + `2`          prioridade BAIXA

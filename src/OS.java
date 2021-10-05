@@ -51,7 +51,11 @@ public class OS {
         System.out.println("quantum\t\tDefine numero de passos executado por cada processo");
         System.out.println();
         System.out.println("-L\t\tDefine a lista de programas a ser executado");
-        System.out.println("lista_de_programas [prioridade]\n\t\tIndica o(s) programa(s) a ser(em) carregado(s)");
+        System.out.println("lista_de_programas [arrival_time] [prioridade]\n\t\tIndica o(s) programa(s) a ser(em) carregado(s)");
+        System.out.println();
+        System.out.println("arrival_time\tDefine o tempo de chegada de cada processo (tempo do passos de execucao do OS)");
+        System.out.println("indefinido\ttempo de execucao padrao (" + Kernel.ARRIVAL_TIME_PADRAO + ")");
+        System.out.println();
         System.out.println("prioridade\tDefine a prioridade de execucao de cada processo (requer politica PP):");
         System.out.println("0\t\tprioridade ALTA");
         System.out.println("1\t\tprioridade MEDIA");
@@ -63,7 +67,7 @@ public class OS {
 
     public static void imprimeLinhaDeComando()
     {
-        System.out.println("\nUSO: java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade] [-V]]]");
+        System.out.println("\nUSO: java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]]");
     }
 
 }
