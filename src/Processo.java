@@ -1,4 +1,5 @@
 import java.nio.file.Path;
+import java.util.EnumMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -17,12 +18,13 @@ public class Processo extends Primitivas {
     private int processingTime;
     private int turnaroundTime;
     private int arrivalTime;
+    private EnumMap<EstadoProcesso, Integer> tempoDeEstados = new EnumMap<>(EstadoProcesso.class);
     
     public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum, int arrivalTime) throws Exception {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
-        this.estado = EstadoProcesso.READY;
+        this.estado = (arrivalTime == 0) ? EstadoProcesso.READY : EstadoProcesso.NEW;
         this.prioridade = prioridade;
         this.timeout = quantum;
         this.arrivalTime = arrivalTime;
@@ -135,9 +137,14 @@ public class Processo extends Primitivas {
         this.timeout = timeout;
     }
 
-    public void computaTempoDoOS() {
+    public EstadoProcesso computaTempoDoOS(int passoDeExecucaoDoOS) {
+        tempoDeEstados.computeIfPresent(this.estado, (k, v) -> v + 1);
+        tempoDeEstados.putIfAbsent(this.estado, 1);
         this.turnaroundTime++;
         switch (this.estado) {
+            case NEW:
+                if (this.arrivalTime <= passoDeExecucaoDoOS) this.estado = EstadoProcesso.READY;
+                break;
             case READY:
                 this.waitingTime++;
                 break;
@@ -147,6 +154,7 @@ public class Processo extends Primitivas {
             default:
                 break;
         }
+        return this.estado;
     }
 
     private EstadoProcesso blockTime()
@@ -181,6 +189,10 @@ public class Processo extends Primitivas {
         this.estado = novoEstado;
     }
 
+    public int getArrivalTime() {
+        return arrivalTime;
+    }
+
     @Override
     public String toString() {
         return "Processo ["
@@ -197,5 +209,10 @@ public class Processo extends Primitivas {
             + ", pc=" + pc
             + ", acc=" + acc
             + "]";
+    }
+
+    public String tempoDeEstadoString()
+    {
+        return "Tempos de Estados do Processo: " + tempoDeEstados.toString();
     }
 }

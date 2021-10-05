@@ -1,4 +1,4 @@
 enum EstadoProcesso
 {
-    READY, RUNNING, BLOCKED, EXIT
+    NEW, READY, RUNNING, BLOCKED, EXIT
 };
