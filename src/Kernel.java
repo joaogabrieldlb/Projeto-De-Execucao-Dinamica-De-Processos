@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+git cheimport java.util.concurrent.PriorityBlockingQueue;
 
 public class Kernel
 {
@@ -21,7 +22,6 @@ public class Kernel
     private List<Processo> listaDeProcessos = new ArrayList<>();
     
     // Caso a politica de escalonamento for Round Robin
-    private int quantum;
     private Queue<Processo> filaProcessosProntosRR = new LinkedBlockingQueue<>();
 
     // Caso a politica de escalonamento for Prioridade Preemptivo
@@ -45,7 +45,7 @@ public class Kernel
         // Tratamento de argumentos para UpperCase
         for (int i = 0; i < args.length; i++)
         {
-            args[i] = args[i].toUpperCase();
+            if (args[i].startsWith("-")) args[i] = args[i].toUpperCase();
         }
         List<String> listaDeParametros = new ArrayList<>(Arrays.asList(args));
 
@@ -59,15 +59,17 @@ public class Kernel
         // DEBUG
         if (OS.verbose) System.out.println("ARGS: "+ listaDeParametros);
         
-        // DEBUG - mostra index do -p
-        if (OS.verbose) System.out.println("INDICE DO PARAMETRO -P: " + listaDeParametros.indexOf("-P"));
-
         // Definicao da politica de escalonamento (-P)
         int indexP = listaDeParametros.indexOf("-P");
         if (indexP < 0)
         {
             throw new InvalidParameterException("Parametro -p nao encontrado.");
         }
+        
+        // DEBUG - mostra index do -p
+        if (OS.verbose) System.out.println("INDICE DO PARAMETRO -P: " + listaDeParametros.indexOf("-P"));
+
+
         // Configuracao da politica de escalonamento
         String complementoP;
         try {
@@ -79,23 +81,17 @@ public class Kernel
         {
             switch (complementoP)
             {
+                case "pp":
                 case "PP":
                     this.politicaDoEscalonador = PoliticaDeEscalonamento.PRIORIDADE_COM_PREEMPCAO;
                     //DEBUG
                     if (OS.verbose) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
                     break;
+                case "rr":
                 case "RR":
                     this.politicaDoEscalonador = PoliticaDeEscalonamento.ROUND_ROBIN;
                     //DEBUG
                     if (OS.verbose) System.out.println("POLITICA DO ESCALONADOR: " + politicaDoEscalonador);
-                    try {
-                        this.quantum = Integer.parseInt(listaDeParametros.get(indexP + 2));
-                        // DEBUG
-                        if (OS.verbose) System.out.println("VALOR DO QUANTUM: " + this.quantum);
-                        if (this.quantum <= 0) throw new InvalidParameterException("Valor menor ou igual a zero.");
-                    } catch (Exception e) {
-                        throw new InvalidParameterException("Quantum invalido. " + e.getMessage());
-                    }
                     break;
                 default:
                     throw new InvalidParameterException("Parametro -p com complemento invalido: \"" + complementoP + "\"");
@@ -108,7 +104,7 @@ public class Kernel
         {
             throw new InvalidParameterException("Parametro -l nao encontrado.");
         }
-        // DEBUG
+        // DEBUG - mostra index do -l
         if (OS.verbose) System.out.println("INDICE DO PARAMETRO -L: " + indexL);
 
         int indexLInicio;
@@ -153,35 +149,61 @@ public class Kernel
                 // DEBUG
                 if (OS.verbose) System.out.println("PROGRAMA ACESSADO: " + parametro);
                 Path arquivoDoPrograma = Paths.get(appsPath, parametro);
+                int quantum = 0;
                 int prioridade = PRIORIDADE_PADRAO;
                 int arrivalTime = ARRIVAL_TIME_PADRAO;
 
-                if(iterLP.hasNext())
+                // Define prioridade ou quantum
+                if (iterLP.hasNext())
                 {
-                    String complementoPrograma = iterLP.next();
-                    try {
-                        arrivalTime = Integer.parseInt(complementoPrograma);
-                        if (arrivalTime < 0) throw new InvalidParameterException("ArrivalTime nao pode ser negativo.");
-                    } 
-                    catch(Exception e)
+                    String complementoPolitica = iterLP.next();
+                    int complementoPoliticaInt = 0;
+
+                            // [pp] < 0 > 2 volta [aa]
+                            // qq < 0 xx [aa]
+                    switch(this.politicaDoEscalonador)
                     {
-                        System.err.println("Parametro arrivalTime invalido." + e.getMessage() + "\nDefinido valor padrao: arrivalTime=" + ARRIVAL_TIME_PADRAO);
-                        iterLP.previous();
+                        case PRIORIDADE_COM_PREEMPCAO:
+                            try {
+                                complementoPoliticaInt = Integer.parseInt(complementoPolitica);
+                                // DEBUG
+                                if (OS.verbose) System.out.println("VALOR DA PRIORIDADE: " + complementoPoliticaInt);
+                                if (complementoPoliticaInt < 0) throw new InvalidParameterException("Valor nao pode ser negativo.");
+                                if (complementoPoliticaInt > PRIORIDADE_PADRAO) throw new InvalidParameterException();
+                                prioridade = complementoPoliticaInt;
+                            } catch (Exception e) {
+                                iterLP.previous();
+                                System.err.println("Parametro prioridade invalido. " + e.getMessage() + "\nDefinido valor padrao: prioridade=" + PRIORIDADE_PADRAO);
+                            }
+                            break;
+                        case ROUND_ROBIN:
+                            try {
+                                quantum = Integer.parseInt(complementoPolitica);
+                                // DEBUG
+                                if (OS.verbose) System.out.println("VALOR DO QUANTUM: " + quantum);
+                                if (quantum <= 0) throw new InvalidParameterException("Valor menor ou igual a zero.");
+                            } catch (Exception e) {
+                                throw new InvalidParameterException("Parametro quantum invalido. " + e.getMessage());
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
 
-                if (iterLP.hasNext())
+                if(iterLP.hasNext())
                 {
-                    String complementoPrograma = iterLP.next();
-                    switch (complementoPrograma)
+                    String complementoArrivalTime = iterLP.next();
+                    try {
+                        arrivalTime = Integer.parseInt(complementoArrivalTime);
+                        // DEBUG
+                        if (OS.verbose) System.out.println("VALOR DO ARRIVAL_TIME: " + complementoArrivalTime);
+                        if (arrivalTime < 0) throw new InvalidParameterException("Valor nao pode ser negativo.");
+                    } 
+                    catch(Exception e)
                     {
-                        case "0":
-                        case "1":
-                        case "2":
-                            prioridade = Integer.parseInt(complementoPrograma);
-                            break;
-                        default:
-                            iterLP.previous();
+                        System.err.println("Parametro arrival_time invalido. " + e.getMessage() + "\nDefinido valor padrao: arrival_time=" + ARRIVAL_TIME_PADRAO);
+                        iterLP.previous();
                     }
                 }
 
@@ -283,7 +305,7 @@ public class Kernel
             Processo processoAtual = consultaProcessoRR();
             if(processoAtual != null)
             {
-                processoAtual.setTimeout(this.quantum);
+                processoAtual.resetTimeout();
                 // DEBUG
                 if (OS.verbose) System.out.println("=> NOVO PROCESSO EM EXECUÇÃO: " + processoAtual);
                 do {

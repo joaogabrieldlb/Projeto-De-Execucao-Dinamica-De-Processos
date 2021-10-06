@@ -23,14 +23,14 @@ Os programas para execução deverão ser colocados na pasta `apps`.
 ## Instruções
 
 Para executar o OS, executar no terminal do sistema operacional o seguinte comando:
-> `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]]`
+> `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]`
 
 Para recompilar o projeto, executar o seguinte script no terminal do sistema operacional (necessita JDK instalado):
 > `./compila.sh`
 
 ### Parâmetros da linha de comando:
 
-> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]]`
+> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]`
 
 `-T`              Executa o MODO DE TESTE (ignora demais argumentos)
 

@@ -12,6 +12,7 @@ public class Processo extends Primitivas {
     private int acc = 0;
     private int pc = 0;
     private int prioridade;
+    private int quantum;
     private int timeout;
     private int blockTime;
     private int waitingTime;
@@ -26,7 +27,7 @@ public class Processo extends Primitivas {
         this.programa = new Programa(arquivoDoPrograma);
         this.estado = (arrivalTime == 0) ? EstadoProcesso.READY : EstadoProcesso.NEW;
         this.prioridade = prioridade;
-        this.timeout = quantum;
+        this.quantum = this.timeout = quantum;
         this.arrivalTime = arrivalTime;
     }
 
@@ -129,12 +130,8 @@ public class Processo extends Primitivas {
         }
     }
 
-    public void setQuantum(int quantum) {
-        this.timeout = quantum;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void resetTimeout() {
+        this.timeout = this.quantum;
     }
 
     public EstadoProcesso computaTempoDoOS(int passoDeExecucaoDoOS) {
