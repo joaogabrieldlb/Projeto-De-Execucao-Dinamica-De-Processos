@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.Random;
@@ -21,7 +22,7 @@ public class Processo extends Primitivas {
     private int arrivalTime;
     private EnumMap<EstadoProcesso, Integer> tempoDeEstados = new EnumMap<>(EstadoProcesso.class);
     
-    public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum, int arrivalTime) throws Exception {
+    public Processo(long pid, Path arquivoDoPrograma, int prioridade, int quantum, int arrivalTime) throws IOException {
         this.pid = pid;
         this.nomeDoPrograma = arquivoDoPrograma.getFileName().toString();
         this.programa = new Programa(arquivoDoPrograma);
@@ -197,6 +198,7 @@ public class Processo extends Primitivas {
             + ", nomeDoPrograma=" + nomeDoPrograma
             + ", estado=" + estado
             + ", prioridade=" + prioridade 
+            + ", quantum=" + timeout
             + ", timeout=" + timeout
             + ", blocktime=" + blockTime
             + ", waitingTime=" + waitingTime

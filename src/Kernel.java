@@ -1,14 +1,15 @@
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-git cheimport java.util.concurrent.PriorityBlockingQueue;
 
 public class Kernel
 {
@@ -149,7 +150,7 @@ public class Kernel
                 // DEBUG
                 if (OS.verbose) System.out.println("PROGRAMA ACESSADO: " + parametro);
                 Path arquivoDoPrograma = Paths.get(appsPath, parametro);
-                int quantum = 0;
+                Integer quantum = null;
                 int prioridade = PRIORIDADE_PADRAO;
                 int arrivalTime = ARRIVAL_TIME_PADRAO;
 
@@ -158,30 +159,27 @@ public class Kernel
                 {
                     String complementoPolitica = iterLP.next();
                     int complementoPoliticaInt = 0;
-
-                            // [pp] < 0 > 2 volta [aa]
-                            // qq < 0 xx [aa]
                     switch(this.politicaDoEscalonador)
                     {
                         case PRIORIDADE_COM_PREEMPCAO:
                             try {
                                 complementoPoliticaInt = Integer.parseInt(complementoPolitica);
-                                // DEBUG
-                                if (OS.verbose) System.out.println("VALOR DA PRIORIDADE: " + complementoPoliticaInt);
                                 if (complementoPoliticaInt < 0) throw new InvalidParameterException("Valor nao pode ser negativo.");
                                 if (complementoPoliticaInt > PRIORIDADE_PADRAO) throw new InvalidParameterException();
                                 prioridade = complementoPoliticaInt;
+                                // DEBUG
+                                if (OS.verbose) System.out.println("VALOR DA PRIORIDADE: " + prioridade);
                             } catch (Exception e) {
                                 iterLP.previous();
-                                System.err.println("Parametro prioridade invalido. " + e.getMessage() + "\nDefinido valor padrao: prioridade=" + PRIORIDADE_PADRAO);
+                                // System.err.println("Parametro prioridade invalido. " + e.getMessage() + "\nDefinido valor padrao: prioridade=" + PRIORIDADE_PADRAO);
                             }
                             break;
                         case ROUND_ROBIN:
                             try {
                                 quantum = Integer.parseInt(complementoPolitica);
+                                if (quantum <= 0) throw new InvalidParameterException("Valor menor ou igual a zero.");
                                 // DEBUG
                                 if (OS.verbose) System.out.println("VALOR DO QUANTUM: " + quantum);
-                                if (quantum <= 0) throw new InvalidParameterException("Valor menor ou igual a zero.");
                             } catch (Exception e) {
                                 throw new InvalidParameterException("Parametro quantum invalido. " + e.getMessage());
                             }
@@ -196,21 +194,22 @@ public class Kernel
                     String complementoArrivalTime = iterLP.next();
                     try {
                         arrivalTime = Integer.parseInt(complementoArrivalTime);
-                        // DEBUG
-                        if (OS.verbose) System.out.println("VALOR DO ARRIVAL_TIME: " + complementoArrivalTime);
                         if (arrivalTime < 0) throw new InvalidParameterException("Valor nao pode ser negativo.");
+                        // DEBUG
+                        if (OS.verbose) System.out.println("VALOR DO ARRIVAL_TIME: " + arrivalTime);
                     } 
                     catch(Exception e)
                     {
-                        System.err.println("Parametro arrival_time invalido. " + e.getMessage() + "\nDefinido valor padrao: arrival_time=" + ARRIVAL_TIME_PADRAO);
+                        // System.err.println("Parametro arrival_time invalido. " + e.getMessage() + "\nDefinido valor padrao: arrival_time=" + ARRIVAL_TIME_PADRAO);
                         iterLP.previous();
                     }
                 }
 
                 try {
+                    if (this.politicaDoEscalonador.equals(PoliticaDeEscalonamento.ROUND_ROBIN) && quantum == null) throw new InvalidParameterException("Valor do quantum nao encontrado para o processo \"" + parametro + "\".");
                     listaDeProcessos.add(new Processo(pidCounter, arquivoDoPrograma, prioridade, quantum, arrivalTime));
                     pidCounter++;
-                } catch (Exception e) {
+                } catch (IOException e) {
                     System.err.println("Erro ao carregar \"" + parametro + "\": " + e.getMessage());
                 }
             }

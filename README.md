@@ -23,14 +23,14 @@ Os programas para execução deverão ser colocados na pasta `apps`.
 ## Instruções
 
 Para executar o OS, executar no terminal do sistema operacional o seguinte comando:
-> `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]`
+> `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade | quantum] [arrival_time] [-V]]`
 
 Para recompilar o projeto, executar o seguinte script no terminal do sistema operacional (necessita JDK instalado):
 > `./compila.sh`
 
 ### Parâmetros da linha de comando:
 
-> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [arrival_time] [prioridade] [-V]]`
+> USO: `java -jar OS.jar [-T | -P politica -L lista_de_programas [prioridade | quantum] [arrival_time] [-V]]`
 
 `-T`              Executa o MODO DE TESTE (ignora demais argumentos)
 
@@ -38,22 +38,25 @@ Para recompilar o projeto, executar o seguinte script no terminal do sistema ope
 
 `politica`        Escolhe a politica de escalonamento:
 + `PP`             PRIORIDADE COM PREEMPCAO
-+ `RR quantum`     ROUND ROBIN com quantum
-    + `quantum`     Define numero de passos executado por cada processo
++ `RR`             ROUND ROBIN
 
 `-L`              Define a lista de programas a ser executado
 
-+ `lista_de_programas [arrival_time] [prioridade]`
++ `lista_de_programas [prioridade | quantum] [arrival_time]`
     Indica o(s) programa(s) a ser(em) carregado(s)
-
-    + `arrival_time` Define o tempo de chegada de cada processo (tempo do passos de execucao do OS)
-        + `indefinido` tempo de execucao padrao (0)
 
     + `prioridade`   Define a prioridade de execucao de cada processo (requer politica PP):
         + `0`          prioridade ALTA
         + `1`          prioridade MEDIA
         + `2`          prioridade BAIXA
         + `indefinida` prioridade padrao (2)
+       
+    + `quantum`      Define o numero de passos executado por cada processo (requer politica RR)
+                     (obrigatorio)
+
+    + `arrival_time` Define o tempo de chegada de cada processo (tempo do passos de execucao do OS)
+        + `indefinido` tempo de execucao padrao (0)
+
 
 `-V`              Habilita o MODO VERBOSO
 

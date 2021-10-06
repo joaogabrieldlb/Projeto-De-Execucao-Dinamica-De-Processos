@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +16,7 @@ public class Programa
     protected Map<String, String> data = new HashMap<>();
     protected Map<String, Integer> labels = new HashMap<>();
     
-    public Programa(Path arquivoDoPrograma) throws Exception
+    public Programa(Path arquivoDoPrograma) throws IOException
     {
         List<String> codigoFonte = Files.readAllLines(arquivoDoPrograma, StandardCharsets.UTF_8);
         int codeStart = codigoFonte.indexOf(markers[0]);

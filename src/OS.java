@@ -9,19 +9,19 @@ public class OS {
         if (args.length == 0)
         {
             imprimeHelp();
-            // return;
+            return;
         }
 
-        // if (args[0].toUpperCase().equals("-T")) 
-        // {
+        if (args[0].toUpperCase().equals("-T")) 
+        {
             OS.verbose = true;
             System.out.println("================ MODO TESTE ================");
             String[] argsTeste = {"oi1", "-1l", "-oi2", "-p", "pp", "10", "-l", "d", "teste.txt", "Prog1.txt", "1", "Prog1.txt", "0","Prog2.txt", "0", "Prog3.txt", "2", "-v"};
             Kernel testeOs = new Kernel(argsTeste);
             testeOs.escalonador();
             System.exit(0);
-        // return;
-        // }
+        return;
+        }
 
         Kernel polvoOs = null;
         // Trata exceções do construtor e de execução
@@ -61,6 +61,7 @@ public class OS {
         System.out.println("indefinida\tprioridade padrao (" + Kernel.PRIORIDADE_PADRAO + ")");
         System.out.println();
         System.out.println("quantum\t\tDefine o numero de passos executado por cada processo (requer politica RR)");
+        System.out.println("\t\t(obrigatorio)");
         System.out.println();
         System.out.println("arrival_time\tDefine o tempo de chegada de cada processo (tempo do passos de execucao do OS)");
         System.out.println("indefinido\ttempo de execucao padrao (" + Kernel.ARRIVAL_TIME_PADRAO + ")");
